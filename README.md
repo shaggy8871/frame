@@ -39,3 +39,4 @@ Notes:
 1. Get and Twig are automatically aliased to classes \Frame\Request\Get and \Frame\Response\Twig.
 2. Additional classes can be injected by appending them to the parameter list of a controller method, but must be fully namespaced.
 3. If you don't know the output type at compile time, use the generic Response class and call the setType() method before rendering.
+4. The view file is automatically selected based on the controller name and output type. In the example above, the view filename would be /Views/Products/default.html.twig. If no file is available, nothing will be rendered.

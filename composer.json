@@ -1,0 +1,20 @@
+{
+    "name": "shaggy8871/frame",
+    "description": "FRAME is a dead-simple PHP framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "J. Ginsberg",
+            "email": "john.ginsberg@tristadeca.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    },
+    "autoload": {
+        "psr-0": {
+            "": ["src/", "app/"]
+        }
+    }
+}

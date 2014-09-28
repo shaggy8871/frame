@@ -5,7 +5,9 @@ namespace Frame\Core;
 class Router
 {
 
-    // Order of namespace aliases
+    private $project;
+    private $url;
+    // Order of namespace aliases for parameters
     private $paramAliases = [
         'Frame\\Request',
         'Frame\\Response'
@@ -14,15 +16,93 @@ class Router
     public function __construct()
     {
 
-        // Hard-coded for now...
-        $a = new \Controllers\Products();
-        $m = 'routeDefault';
-        $this->callRoute($a, $m);
+        if (php_sapi_name() == 'cli') {
+            // @todo Handle console apps
+        } else {
+            // Handle web apps
+            // @todo determine project dynamically (or via config)
+            $this->project = 'Myapp';
+            $this->url = new Url();
+            $this->parseUrlPathComponents();
+        }
 
     }
 
-    protected function callRoute($class, $method)
+    /*
+     * Determine the target controller based on the url path
+     */
+    private function parseUrlPathComponents()
     {
+
+        $pathComponents = $this->url->pathComponents;
+
+        // Iterate through each and convert to class or method name
+        foreach($pathComponents as &$pathComponent) {
+            $pathComponent = ucfirst($pathComponent);
+        }
+
+        // Alias in the RouteInterface and Url classes
+        $this->createAlias('Frame\\Core\\Url', $this->project . '\\Url');
+        $this->createAlias('Frame\\Core\\Url', $this->project . '\\Controllers\\Url');
+
+        // Attempt 1: Look for Route class in project and call routeResponder method
+        $method = 'routeResponder';
+        $controller = $this->project . '\\Routes';
+        if (((class_exists($controller))) && (is_callable($controller . '::' . $method, true))) {
+            $route = call_user_func(array(new $controller, $method), $this->url);
+            // If we get a class name back, look for another routeRequest method within
+            if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($this->project . '\\Controllers\\' . $route))) {
+                $routeController = $this->project . '\\Controllers\\' . $route;
+                $controllerClass = new $routeController;
+                // Call routeResponder in the controller class
+                $route = call_user_func(array($controllerClass, $method), $this->url);
+                // If I get a partial string result, assume it's a method response
+                if ((is_string($route)) && (strpos($route, '::') === false) && (is_callable(array($controllerClass, $route)))) {
+                    return $this->callRoute($controllerClass, $route);
+                }
+            }
+            // At this stage, we expect a string back in format $controller::$method
+            if ((is_string($route)) && (strpos($route, '::') !== false)) {
+                list($controller, $method) = explode('::', $this->project . '\\Controllers\\' . $route);
+                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                    return $this->callRoute(new $controller, $method);
+                }
+            }
+        }
+
+        // Attempt 2: pointing to a controller with default method
+        $path = $pathComponents;
+        $method = 'routeDefault';
+        $controller = $this->project . '\\Controllers\\' . (empty($path) ? 'Index' : implode('\\', $path));
+        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+            return $this->callRoute(new $controller, $method);
+        }
+
+        // Attempt 3: pointing to a specific method within a controller
+        $path = $pathComponents;
+        $method = 'route' . array_pop($path);
+        $controller = $this->project . '\\Controllers\\' . (empty($path) ? 'Index' : implode('\\', $path));
+        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+            return $this->callRoute(new $controller, $method);
+        }
+
+        // Can't parse
+        // @todo Handle this better, with a 404 or exception screen
+        throw new RouteNotFoundException($this->url);
+
+    }
+
+    /*
+     * Calls the specified route method and injects parameters
+     * $class controller class
+     * $method string method name
+     */
+    private function callRoute($class, $method)
+    {
+
+        if (!is_callable(array($class, $method))) {
+            throw new RouteNotFoundException($this->url);;
+        }
 
         $reflection = new \ReflectionMethod($class, $method);
         $params = $reflection->getParameters();
@@ -37,7 +117,7 @@ class Router
                 $matched = preg_match('/Class ([A-Za-z0-9_\\\-]+) does not exist/', $e->getMessage(), $matches);
                 if (!$matched) {
                     // Re-throw error
-                    throw new \Exception($e->getMessage);
+                    throw new Exception($e->getMessage);
                 }
                 // What number parameter is this?
                 $paramPos = $param->getPosition();
@@ -66,14 +146,14 @@ class Router
         }
 
         // Send the injected parameters into the identified method
-        call_user_func_array(array($class, $method), $inject);
+        $reflection->invokeArgs($class, $inject);
 
     }
 
     /*
      * Copied and modified from http://php.net/manual/en/reflectionparameter.getclass.php#108620
      */
-    protected function getParamClassName(\ReflectionParameter $param)
+    private function getParamClassName(\ReflectionParameter $param)
     {
 
         preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
@@ -84,7 +164,7 @@ class Router
     /*
      * Creates a namespace alias only if it doesn't already exist
      */
-    protected function createAlias($from, $to)
+    private function createAlias($from, $to)
     {
 
         if ((class_exists($from)) && (!class_exists($to))) {

@@ -7,7 +7,7 @@ class Json implements ResponseInterface
 
     private $contentType = 'application/json';
 
-    public function render(array $values = null)
+    public function render($values = null)
     {
 
         if (!headers_sent()) {

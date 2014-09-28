@@ -8,8 +8,12 @@ class Xml implements ResponseInterface
     /*
      * @todo...
      */
-    public function render(array $values = null)
+    public function render($values = null)
     {
+
+        if (!is_array($values)) {
+            throw new InvalidResponseException('Xml response value must be an array');
+        }
 
     }
 

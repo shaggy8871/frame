@@ -9,6 +9,7 @@ class Init
     {
 
         // Initialize config
+        // ...
         // Initialize router
         new Router();
 

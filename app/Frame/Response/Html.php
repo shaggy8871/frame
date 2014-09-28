@@ -5,7 +5,7 @@ namespace Frame\Response;
 class Html implements ResponseInterface
 {
 
-    public function render(array $values = null)
+    public function render($values = null)
     {
 
         print_r($values);

@@ -25,7 +25,7 @@ class Response implements ResponseInterface
     /*
      * Call the defined response class
      */
-    public function render(array $values = null)
+    public function render($values = null)
     {
 
         if (!$this->responseClass) {

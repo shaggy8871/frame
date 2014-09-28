@@ -8,8 +8,12 @@ class Csv implements ResponseInterface
     private $contentType = 'text/csv';
     private $filename = null;
 
-    public function render(array $values = null)
+    public function render($values = null)
     {
+
+        if (!is_array($values)) {
+            throw new InvalidResponseException('Csv response value must be an array');
+        }
 
         if (!headers_sent()) {
             header('Content-Type: ' . $this->contentType);

@@ -38,10 +38,10 @@ class Args extends Request
     /*
      * Magic getter method maps requests to the private $args property
      */
-    public function __get($propery)
+    public function __get($property)
     {
 
-        return (isset($this->args[$propery]) ? $this->args[$propery] : null);
+        return (isset($this->args[$property]) ? $this->args[$property] : null);
 
     }
 

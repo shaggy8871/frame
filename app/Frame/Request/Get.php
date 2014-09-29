@@ -32,10 +32,10 @@ class Get extends Request
     /*
      * Magic getter method maps requests to the private $get property
      */
-    public function __get($propery)
+    public function __get($property)
     {
 
-        return (isset($this->get[$propery]) ? $this->get[$propery] : null);
+        return (isset($this->get[$property]) ? $this->get[$property] : null);
 
     }
 

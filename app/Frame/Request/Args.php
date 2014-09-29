@@ -2,6 +2,10 @@
 
 namespace Frame\Request;
 
+/*
+ * Get command line arguments
+ */
+
 class Args extends Request
 {
 
@@ -13,7 +17,7 @@ class Args extends Request
     public function __construct()
     {
 
-        foreach ($argv as $key => $value) {
+        foreach ($GLOBALS['argv'] as $key => $value) {
             if ($key) {
                 $this->args['arg' . $key] = $value;
             }

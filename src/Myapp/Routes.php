@@ -18,9 +18,9 @@ class Routes implements RoutesInterface
         if ($found) {
             return 'Products::routeDirect'; // Go to a specific method
         }
-        $found = preg_match("/^\/fail/", $url->requestUri, $matches);
+        $found = preg_match("/^\/model/", $url->requestUri, $matches);
         if ($found) {
-            return 'Invalid'; // Should fail
+            return '\\Myapp\\Models\\Test1::getSomething'; // Should route to a model class instead
         }
 
     }

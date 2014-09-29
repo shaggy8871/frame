@@ -45,14 +45,16 @@ class Router
         $this->createAlias('Frame\\Core\\Url', $this->project . '\\Url');
         $this->createAlias('Frame\\Core\\Url', $this->project . '\\Controllers\\Url');
 
+        $projectControllers = $this->project . '\\Controllers\\';
+
         // Attempt 1: Look for Routes class in project and call routeResponder method
         $method = 'routeResponder';
         $controller = $this->project . '\\Routes';
         if (((class_exists($controller))) && (is_callable($controller . '::' . $method, true))) {
             $route = call_user_func(array(new $controller, $method), $this->url);
             // If we get a class name back, look for another routeRequest method within
-            if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($this->project . '\\Controllers\\' . $route))) {
-                $routeController = $this->project . '\\Controllers\\' . $route;
+            if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($projectControllers . $route))) {
+                $routeController = $projectControllers . $route;
                 $controllerClass = new $routeController;
                 // Call routeResponder in the controller class
                 $route = call_user_func(array($controllerClass, $method), $this->url);
@@ -62,8 +64,9 @@ class Router
                 }
             }
             // At this stage, we expect a string back in format $controller::$method
+            // If the return class method starts with "\" char, look outside the project controller tree
             if ((is_string($route)) && (strpos($route, '::') !== false)) {
-                list($controller, $method) = explode('::', $this->project . '\\Controllers\\' . $route);
+                list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
                 if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
                     return $this->callRoute(new $controller, $method);
                 }
@@ -73,7 +76,7 @@ class Router
         // Attempt 2: pointing to a controller with default route
         $path = $pathComponents;
         $method = 'routeDefault';
-        $controller = $this->project . '\\Controllers\\' . (empty($path) ? 'Index' : implode('\\', $path));
+        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
         if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
             return $this->callRoute(new $controller, $method);
         }
@@ -81,7 +84,7 @@ class Router
         // Attempt 3: pointing to a specific route* method within a controller
         $path = $pathComponents;
         $method = 'route' . array_pop($path);
-        $controller = $this->project . '\\Controllers\\' . (empty($path) ? 'Index' : implode('\\', $path));
+        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
         if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
             return $this->callRoute(new $controller, $method);
         }
@@ -94,8 +97,10 @@ class Router
 
     /*
      * Calls the specified route method and injects parameters
-     * @param $class controller class
+     * @param $class controller class object
      * @param $method string method name
+     * @todo Add \ReflectionFunction for closure support
+     * @todo Instantiate parameters only once per global session
      */
     private function callRoute($class, $method)
     {

@@ -8,7 +8,7 @@ class Test1
     public function getSomething()
     {
 
-        return 'something';
+        echo 'Inside model Test1::getSomething';
 
     }
 

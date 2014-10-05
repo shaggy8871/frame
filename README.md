@@ -51,8 +51,7 @@ The `routeResponder` method receives a Url class and expects one of the followin
 
 If the project's default `routeResponder` responds with the name of a controller class, the controller is instantiated and inspected for its own `routeResponder` method. This allows each controller to take charge of its own routing rules, rather than relying on a project-centric approach.
 
-** RouteResponder example **
-
+**RouteResponder example**
 ```php
 <?php
 

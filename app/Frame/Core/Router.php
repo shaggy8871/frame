@@ -98,7 +98,16 @@ class Router
                 }
             }
 
-            // Otherwise, if we get a closure back, call it immediately
+            // If we get a string back in format $controller::$method, look for the method
+            // If the return class method starts with "\" char, look outside the project controller tree
+            if ((is_string($route)) && (strpos($route, '::') !== false)) {
+                list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
+                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                    return $this->invokeClassMethod(new $controller, $method);
+                }
+            }
+
+            // Otherwise, if we get a closure back, call it
             if (is_callable($route)) {
                 if ((is_array($route)) && (count($route) == 2)) {
                     return $this->invokeClassMethod($route[0], $route[1]);
@@ -107,15 +116,6 @@ class Router
                     if ($reflection->isClosure()) {
                         return $this->invokeFunction($route);
                     }
-                }
-            }
-
-            // Finally, if we get a string back in format $controller::$method
-            // If the return class method starts with "\" char, look outside the project controller tree
-            if ((is_string($route)) && (strpos($route, '::') !== false)) {
-                list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
-                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-                    return $this->invokeClassMethod(new $controller, $method);
                 }
             }
 

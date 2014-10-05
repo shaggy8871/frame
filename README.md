@@ -44,7 +44,7 @@ The `routeResponder` method receives a Url class and expects one of the followin
 
 1. The name of a controller class (as a string)
 2. A string in the format `Controller::Method` where the controller sits within the project's `Controllers/` folder
-3. A string denoting a fully qualified namespaced method, for example `\\Myapp\\Controllers\\Products::someMethod`. Fully qualified names must begin with a backslash.
+3. A string denoting a fully qualified namespaced method, for example `\Myapp\Controllers\Products::someMethod`. Fully qualified names must begin with a backslash.
 4. A closure
 5. A class method array in the format `array($object, $methodName)`. If the method is static, `$object` can be a string, otherwise it must be an instantiated object.
 

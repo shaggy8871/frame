@@ -12,7 +12,7 @@ Example:
 ```php
 <?php
 
-namespace Controllers;
+namespace Myapp\Controllers;
 
 class Products
 {
@@ -25,7 +25,7 @@ class Products
   {
 
     // Render the product home page using Twig, send through GET variable 'category'
-    // The view file is assumed to be /Project/Views/Products/default.twig.html
+    // The view file is assumed to be /Myapp/Views/Products/default.twig.html
     return array(
       'category' => $request->category
     );
@@ -49,7 +49,57 @@ The `routeResponder` method receives a Url class and expects one of the followin
 4. A closure
 5. A class method array in the format `array($object, $methodName)`. If the method is static, `$object` can be a string, otherwise it must be an instantiated object.
 
-If the project's default `routeResponder` responds with the name of a controller class, the controller is instantiated and inspected for its own `routeResponder` method. This allows each controller to take charge of their own routing rules, rather than relying on a project-centric approach.
+If the project's default `routeResponder` responds with the name of a controller class, the controller is instantiated and inspected for its own `routeResponder` method. This allows each controller to take charge of its own routing rules, rather than relying on a project-centric approach.
+
+** RouteResponder example **
+
+```php
+<?php
+
+namespace Myapp;
+
+use \Frame\Core\RoutesInterface;
+
+class Routes implements RoutesInterface
+{
+
+    public function routeResponder(Url $url)
+    {
+
+        $found = preg_match("/^\/product/", $url->requestUri, $matches);
+        if ($found) {
+            return 'Products'; // look in the Products controller
+        }
+        $found = preg_match("/^\/testing/", $url->requestUri, $matches);
+        if ($found) {
+            return 'Products::routeDirect'; // Go to a specific method
+        }
+        $found = preg_match("/^\/model/", $url->requestUri, $matches);
+        if ($found) {
+            return '\Myapp\Models\Test1::getSomething'; // Should route to a model class instead
+        }
+        $found = preg_match("/^\/closure/", $url->requestUri, $matches);
+        if ($found) {
+            return (function(Get $request, Json $response) {
+                return 'I am inside a project closure';
+            });
+        }
+        $found = preg_match("/^\/routemethod/", $url->requestUri, $matches);
+        if ($found) {
+            return array($this, 'routeMethod'); // point to the local method
+        }
+
+    }
+
+    public function routeMethod(Get $request)
+    {
+
+        return "I am in routemethod";
+
+    }
+
+}
+```
 
 ## Notes:
 

@@ -5,6 +5,6 @@ namespace Frame\Response;
 interface ResponseInterface
 {
 
-    public function render($values = null);
+    public function render($params = null);
 
 }

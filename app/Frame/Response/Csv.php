@@ -2,29 +2,31 @@
 
 namespace Frame\Response;
 
-class Csv implements ResponseInterface
+class Csv extends Foundation implements ResponseInterface
 {
 
-    private $contentType = 'text/csv';
-    private $filename = null;
+    protected $contentType = 'text/csv';
+    protected $downloadFilename = null;
 
-    public function render($values = null)
+    public function render($params = null)
     {
 
-        if (!is_array($values)) {
+        $params = ($params ? $params : $this->viewParams);
+
+        if (!is_array($params)) {
             throw new InvalidResponseException('Csv response value must be an array');
         }
 
         if (!headers_sent()) {
             header('Content-Type: ' . $this->contentType);
-            if ($this->filename != null) {
+            if ($this->downloadFilename != null) {
                 header('Content-Disposition: attachment; filename="' . $this->filename . '"');
                 header('Content-Transfer-Encoding: binary');
             }
         }
 
         $fp = fopen('php://output', 'w');
-        foreach($values as $row) {
+        foreach($params as $row) {
             fputcsv($fp, $row);
         }
         fclose($fp);
@@ -34,20 +36,10 @@ class Csv implements ResponseInterface
     /*
      * Set the filename to force the browser to download the CSV
      */
-    public function setFilename($filename)
+    public function setDownloadFilename($filename)
     {
 
-        $this->filename = $filename;
-
-    }
-
-    /*
-     * Set the content type to something other than the default
-     */
-    public function setContentType($contentType)
-    {
-
-        $this->contentType = $contentType;
+        $this->downloadFilename = $filename;
 
     }
 

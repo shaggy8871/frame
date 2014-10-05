@@ -5,13 +5,27 @@ namespace Frame\Core;
 class Init
 {
 
-    public function __construct()
+    protected $projects;
+
+    public function __construct(array $projects = array())
     {
+
+        $this->projects = $projects;
 
         // Initialize config
         // ...
         // Initialize router
-        new Router();
+        new Router($this);
+
+    }
+
+    /*
+     * Allow read access only
+     */
+    public function __get($property)
+    {
+
+        return $this->$property;
 
     }
 

@@ -22,6 +22,23 @@ class Routes implements RoutesInterface
         if ($found) {
             return '\\Myapp\\Models\\Test1::getSomething'; // Should route to a model class instead
         }
+        $found = preg_match("/^\/closure/", $url->requestUri, $matches);
+        if ($found) {
+            return (function(Get $request, Json $response) {
+                return 'I am inside a project closure';
+            });
+        }
+        $found = preg_match("/^\/routemethod/", $url->requestUri, $matches);
+        if ($found) {
+            return array($this, 'routeMethod'); // point to the local method
+        }
+
+    }
+
+    public function routeMethod(Get $request)
+    {
+
+        return "I am in routemethod";
 
     }
 

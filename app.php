@@ -1,4 +1,6 @@
 <?php
 include_once "vendor/autoload.php";
 
-new \Frame\Core\Init();
+new \Frame\Core\Init([
+    'localhost' => 'Myapp'
+]);

@@ -5,17 +5,17 @@ namespace Myapp\Controllers;
 class Index
 {
 
-    public function routeDefault(Get $in, Html $out)
+    public function routeDefault(Get $request)
     {
 
-        $out->render("Default home page");
+        return "Default home page";
 
     }
 
-    public function routeProduct(Helpers\TestHelper $in, Html $out)
+    public function routeProduct(Helpers\TestHelper $request, Html $response)
     {
 
-        $out->render(__METHOD__);
+        $response->render(__METHOD__);
 
     }
 

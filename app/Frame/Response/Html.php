@@ -2,13 +2,21 @@
 
 namespace Frame\Response;
 
-class Html implements ResponseInterface
+class Html extends Foundation implements ResponseInterface
 {
 
-    public function render($values = null)
+    protected $contentType = 'text/html';
+
+    public function render($params = null)
     {
 
-        print_r($values);
+        $params = ($params ? $params : $this->viewParams);
+
+        if (!headers_sent()) {
+            header('Content-Type: ' . $this->contentType);
+        }
+
+        echo $params;
 
     }
 

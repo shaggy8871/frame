@@ -2,29 +2,24 @@
 
 namespace Frame\Response;
 
-class Json implements ResponseInterface
+class Json extends Foundation implements ResponseInterface
 {
 
-    private $contentType = 'application/json';
+    protected $contentType = 'application/json';
 
-    public function render($values = null)
+    /*
+     * Render content in Json encoded format
+     */
+    public function render($params = null)
     {
+
+        $params = ($params ? $params : $this->viewParams);
 
         if (!headers_sent()) {
             header('Content-Type: ' . $this->contentType);
         }
 
-        echo json_encode($values);
-
-    }
-
-    /*
-     * Set the content type to something other than the default
-     */
-    public function setContentType($contentType)
-    {
-
-        $this->contentType = $contentType;
+        echo json_encode($params);
 
     }
 

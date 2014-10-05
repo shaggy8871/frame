@@ -6,20 +6,22 @@ namespace Frame\Response;
  * For CLI sapi only
  */
 
-class StdOut implements ResponseInterface
+class StdOut extends Foundation implements ResponseInterface
 {
 
     /*
      * Render must send through a string
      */
-    public function render($values = null)
+    public function render($params = null)
     {
 
-        if (!is_string($values)) {
+        $params = ($params ? $params : $this->viewParams);
+
+        if (!is_string($params)) {
             throw new InvalidResponseException('StdOut response value must be a string');
         }
 
-        fwrite(STDOUT, $values);
+        fwrite(STDOUT, $params);
 
     }
 

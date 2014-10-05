@@ -2,7 +2,7 @@
 
 namespace Frame\Response;
 
-class Response implements ResponseInterface
+class Response extends Foundation implements ResponseInterface
 {
 
     private $responseClass;
@@ -25,14 +25,14 @@ class Response implements ResponseInterface
     /*
      * Call the defined response class
      */
-    public function render($values = null)
+    public function render($params = null)
     {
 
         if (!$this->responseClass) {
             throw new \Exception('No Response type defined. Use Response \$out->setType to indicate.');
         }
 
-        $this->responseClass->render($values);
+        $this->responseClass->render($params);
 
     }
 

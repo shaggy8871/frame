@@ -5,25 +5,56 @@ namespace Frame\Core;
 class Router
 {
 
+    const REQUEST = 0;
+    const RESPONSE = 1;
+
     private $project;
     private $url;
-    // Order of namespace aliases for parameters
+    // Order of namespace aliases for request/response parameters
     private $paramAliases = [
         'Frame\\Request',
         'Frame\\Response'
     ];
 
-    public function __construct()
+    public function __construct(Init $init = null)
     {
 
         if (php_sapi_name() == 'cli') {
             // @todo Handle console apps
+            $this->project = $this->getProjectFromArgs();
         } else {
             // Handle web apps
-            // @todo determine project dynamically (or via config)
-            $this->project = 'Myapp';
             $this->url = new Url();
+            $this->project = $this->getProjectFromHost($init->projects);
             $this->parseUrlPathComponents();
+        }
+
+    }
+
+    /*
+     * Determine the project folder from the hostname
+     */
+    private function getProjectFromHost($projects)
+    {
+
+        if (array_key_exists($this->url->host, $projects)) {
+            return $projects[$this->url->host];
+        } else {
+            throw new \Exception('Cannot determine project path from host ' . $this->url->host);
+        }
+
+    }
+
+    /*
+     * Determine the project folder from the first CLI argument
+     */
+    private function getProjectFromArgs()
+    {
+
+        if ((isset($GLOBALS['argv'])) && (count($GLOBALS['argv']) > 1) && (file_exists('src/' . $GLOBALS['argv'][1]))) {
+            return $GLOBALS['argv'][1];
+        } else {
+            throw new \Exception('Cannot determine project path from argument ' . $GLOBALS['argv'][1]);
         }
 
     }
@@ -51,26 +82,43 @@ class Router
         $method = 'routeResponder';
         $controller = $this->project . '\\Routes';
         if (((class_exists($controller))) && (is_callable($controller . '::' . $method, true))) {
+
+            // Call the project routeResponder method
             $route = call_user_func(array(new $controller, $method), $this->url);
-            // If we get a class name back, look for another routeRequest method within
+
+            // If we get a class name back, look for another routeResponder method within
             if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($projectControllers . $route))) {
                 $routeController = $projectControllers . $route;
                 $controllerClass = new $routeController;
                 // Call routeResponder in the controller class
                 $route = call_user_func(array($controllerClass, $method), $this->url);
-                // If I get a partial string result, assume it's a method response
+                // Otherwise, if I get a partial string result, assume it's a method response
                 if ((is_string($route)) && (strpos($route, '::') === false) && (is_callable(array($controllerClass, $route)))) {
-                    return $this->callRoute($controllerClass, $route);
+                    return $this->invokeClassMethod($controllerClass, $route);
                 }
             }
-            // At this stage, we expect a string back in format $controller::$method
+
+            // Otherwise, if we get a closure back, call it immediately
+            if (is_callable($route)) {
+                if ((is_array($route)) && (count($route) == 2)) {
+                    return $this->invokeClassMethod($route[0], $route[1]);
+                } else {
+                    $reflection = new \ReflectionFunction($route);
+                    if ($reflection->isClosure()) {
+                        return $this->invokeFunction($route);
+                    }
+                }
+            }
+
+            // Finally, if we get a string back in format $controller::$method
             // If the return class method starts with "\" char, look outside the project controller tree
             if ((is_string($route)) && (strpos($route, '::') !== false)) {
                 list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
                 if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-                    return $this->callRoute(new $controller, $method);
+                    return $this->invokeClassMethod(new $controller, $method);
                 }
             }
+
         }
 
         // Attempt 2: pointing to a controller with default route
@@ -78,7 +126,7 @@ class Router
         $method = 'routeDefault';
         $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
         if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-            return $this->callRoute(new $controller, $method);
+            return $this->invokeClassMethod(new $controller, $method);
         }
 
         // Attempt 3: pointing to a specific route* method within a controller
@@ -86,30 +134,56 @@ class Router
         $method = 'route' . array_pop($path);
         $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
         if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-            return $this->callRoute(new $controller, $method);
+            return $this->invokeClassMethod(new $controller, $method);
         }
 
         // Can't parse
         // @todo Handle this better, with a 404 or exception screen
-        throw new RouteNotFoundException($this->url);
+        throw new Exception\RouteNotFoundException($this->url);
 
     }
 
     /*
-     * Calls the specified route method and injects parameters
+     * Calls the specified class method and injects parameters
      * @param $class controller class object
      * @param $method string method name
-     * @todo Add \ReflectionFunction for closure support
      * @todo Instantiate parameters only once per global session
      */
-    private function callRoute($class, $method)
+    private function invokeClassMethod($class, $method)
     {
 
         if (!is_callable(array($class, $method))) {
-            throw new RouteNotFoundException($this->url);;
+            throw new Exception\RouteNotFoundException($this->url);
         }
 
-        $reflection = new \ReflectionMethod($class, $method);
+        $this->invokeCallable(new \ReflectionMethod($class, $method), $class);
+
+    }
+
+    /*
+     * Calls the specified function or closure and injects parameters
+     * @param $class controller class object
+     * @param $method string method name
+     * @todo Instantiate parameters only once per global session
+     */
+    private function invokeFunction($function)
+    {
+
+        if (!is_callable($function)) {
+            throw new Exception\RouteNotFoundException($this->url);
+        }
+
+        $this->invokeCallable(new \ReflectionFunction($function));
+
+    }
+
+    /*
+     * Calls the method or closure and injects parameters dynamically
+     */
+    private function invokeCallable($reflection, $class = null)
+    {
+
+        // Get an array of ReflectionParameter objects
         $params = $reflection->getParameters();
         // Injection array
         $inject = [];
@@ -128,7 +202,7 @@ class Router
                 $paramPos = $param->getPosition();
                 // Do I have an alias for this parameter?
                 if (!isset($this->paramAliases[$paramPos])) {
-                    throw new Exception\UnknownAliasException($this->getParamClassName($param), get_class($class), $param->getDeclaringFunction()->name);
+                    throw new Exception\UnknownAliasException($this->getParamClassName($param), ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
                 }
                 // Determine the alias
                 $aliasNamespace = explode('\\', $matches[1]);
@@ -140,7 +214,7 @@ class Router
                 try {
                     $paramClass = $param->getClass();
                 } catch (\ReflectionException $e) {
-                    throw new Exception\ClassNotFoundException($alias, get_class($class), $param->getDeclaringFunction()->name);
+                    throw new Exception\ClassNotFoundException($alias, ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
                 }
             }
             // If we get this far, we should have the class aliased and auto-loaded
@@ -151,7 +225,22 @@ class Router
         }
 
         // Send the injected parameters into the identified method
-        $reflection->invokeArgs($class, $inject);
+        if ($reflection instanceof \ReflectionMethod) {
+            $response = $reflection->invokeArgs($class, $inject);
+        } else {
+            $response = $reflection->invokeArgs($inject);
+        }
+
+        if ($response) {
+            // If object is a Response class, simply call the render method (assume it knows what to do)
+            // Otherwise call the render method on the defined/default response class
+            if ((is_object($response)) && (in_array('Frame\Response\ResponseInterface', class_implements($response, true)))) {
+                $response->render();
+            } else {
+                $responseClass = (array_key_exists(self::RESPONSE, $inject) ? $inject[self::RESPONSE] : new \Frame\Response\Html());
+                $responseClass->render($response);
+            }
+        }
 
     }
 

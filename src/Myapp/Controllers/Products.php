@@ -19,34 +19,44 @@ class Products
         if ($found) {
             return 'anotherMethod'; // look in this controller for method anotherMethod
         }
+        $found = preg_match("/^\/product3/", $url->requestUri, $matches);
+        if ($found) {
+            return (function(Get $request, Html $response) {
+                return 'I am inside a closure';
+            });
+        }
+        $found = preg_match("/^\/product4/", $url->requestUri, $matches);
+        if ($found) {
+            return array($this, 'routeDefault');
+        }
 
     }
 
-    public function routeDefault(Get $in, Json $out, \Myapp\Models\Something $else)
+    public function routeDefault(Get $request, Json $response, \Myapp\Models\Something $else)
     {
 
-        $out->render($in->toArray());
+        return array('this' => 'is', 'cool' => 'yeah?');
 
     }
 
-    public function routeSubdir(Get $in)
+    public function routeSubdir(Get $request)
     {
 
-        echo "You are in subdir with get params " . print_r($in->toArray(), true);
+        return "You are in subdir with get params " . print_r($request->toArray(), true);
 
     }
 
-    public function routeDirect(Get $in, Html $out)
+    public function routeDirect(Get $request, Html $response)
     {
 
-        $out->render(__METHOD__);
+        $response->render(__METHOD__);
 
     }
 
-    public function anotherMethod(Get $in, Html $out)
+    public function anotherMethod(Get $request, Html $response)
     {
 
-        $out->render(__METHOD__);
+        $response->render(__METHOD__);
 
     }
 

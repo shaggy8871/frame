@@ -53,10 +53,11 @@ class Products
 
     }
 
-    public function anotherMethod(Get $request, Html $response)
+    public function anotherMethod(Get $request, Json $response)
     {
 
-        $response->render(__METHOD__);
+        $response->setViewParams(array('this'));
+        return $response;
 
     }
 

@@ -6,7 +6,7 @@ abstract class Foundation
 {
 
     protected $contentType;
-    protected $viewFile;
+    protected $viewFilename;
     protected $viewParams;
 
     /*
@@ -22,10 +22,10 @@ abstract class Foundation
     /*
      * Change the view filename and path
      */
-    public function setViewFile($file)
+    public function setViewFilename($filename)
     {
 
-        $this->viewFile = $viewFile;
+        $this->viewFilename = $filename;
 
     }
 
@@ -35,7 +35,7 @@ abstract class Foundation
     public function setViewParams($params)
     {
 
-        $this->viewParams = $viewParams;
+        $this->viewParams = $params;
 
     }
 

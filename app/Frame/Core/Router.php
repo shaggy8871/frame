@@ -87,14 +87,17 @@ class Router
             $route = call_user_func(array(new $controller, $method), $this->url);
 
             // If we get a class name back, look for another routeResponder method within
-            if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($projectControllers . $route))) {
+            if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($projectControllers . $route)) && (method_exists($projectControllers . $route, $method))) {
+                $savedRoute = $route;
                 $routeController = $projectControllers . $route;
                 $controllerClass = new $routeController;
                 // Call routeResponder in the controller class
                 $route = call_user_func(array($controllerClass, $method), $this->url);
-                // Otherwise, if I get a partial string result, assume it's a method response
+                // If I get a partial string result, assume it's a method response, otherwise prepare for fallback
                 if ((is_string($route)) && (strpos($route, '::') === false) && (is_callable(array($controllerClass, $route)))) {
                     return $this->invokeClassMethod($controllerClass, $route);
+                } else {
+                    $pathComponents[0] = $savedRoute;
                 }
             }
 
@@ -234,7 +237,7 @@ class Router
         if ($response) {
             // If object is a Response class, simply call the render method (assume it knows what to do)
             // Otherwise call the render method on the defined/default response class
-            if ((is_object($response)) && (in_array('Frame\Response\ResponseInterface', class_implements($response, true)))) {
+            if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {
                 $response->render();
             } else {
                 $responseClass = (array_key_exists(self::RESPONSE, $inject) ? $inject[self::RESPONSE] : new \Frame\Response\Html());

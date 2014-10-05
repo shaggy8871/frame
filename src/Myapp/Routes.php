@@ -20,7 +20,7 @@ class Routes implements RoutesInterface
         }
         $found = preg_match("/^\/model/", $url->requestUri, $matches);
         if ($found) {
-            return '\Myapp\Models\Test1::getSomething'; // Should route to a model class instead
+            return '\\Myapp\\Models\\Test1::getSomething'; // Should route to a model class instead
         }
         $found = preg_match("/^\/closure/", $url->requestUri, $matches);
         if ($found) {

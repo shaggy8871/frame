@@ -21,13 +21,14 @@ class Products
    * 'route' methods correspond to URLs
    * Input and output is managed via injected classes. Custom IO classes can be written.
    */
-  public function routeDefault(Get $in, Twig $out)
+  public function routeDefault(Get $request, Twig $response)
   {
 
     // Render the product home page using Twig, send through GET variable 'category'
-    $out->render(array(
-      'category' => $in->category
-    ));
+    // The view file is assumed to be /Project/Views/Products/default.twig.html
+    return array(
+      'category' => $request->category
+    );
 
   }
 
@@ -52,7 +53,7 @@ If the project's default `routeResponder` responds with the name of a controller
 
 ## Notes:
 
-1. Get and Twig are automatically aliased to classes \Frame\Request\Get and \Frame\Response\Twig.
+1. `Get` and `Twig` classes in the example above are automatically aliased to classes `\Frame\Request\Get` and `\Frame\Response\Twig`.
 2. Additional classes can be injected by appending them to the parameter list of a controller method, but must be fully namespaced.
-3. If you don't know the output type at compile time, use the generic Response class and call the setType() method before rendering.
-4. The view file is automatically selected based on the controller name and output type. In the example above, the view filename would be /Views/Products/default.html.twig. If no file is available, nothing will be rendered.
+3. If you don't know the output type at compile time, use the generic `Response` class and call the `setType()` method before rendering.
+4. The view file is automatically selected based on the controller name and output type. In the example above, the view filename would be /Views/Products/default.html.twig. Each `Response` class has its own fallback method if the view file is not found.

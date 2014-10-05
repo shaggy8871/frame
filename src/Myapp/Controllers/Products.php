@@ -11,6 +11,10 @@ class Products
     public function routeResponder(Url $url)
     {
 
+        $found = preg_match("/^\/products\/int/", $url->requestUri, $matches);
+        if ($found) {
+            return '\\Myapp\\Models\\Test1::getSomething';
+        }
         $found = preg_match("/^\/product1/", $url->requestUri, $matches);
         if ($found) {
             return 'Index::routeProduct'; // go to controller Index, method routeProduct

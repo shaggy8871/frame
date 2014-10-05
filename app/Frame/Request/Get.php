@@ -5,7 +5,7 @@ namespace Frame\Request;
 class Get extends Request
 {
 
-    private $get = array();
+    protected $get = array();
 
     /*
      * GET values are simply stored as object properties - unsanitized!

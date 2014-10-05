@@ -19,4 +19,11 @@ class Index
 
     }
 
+    public function routeFallback(Helpers\TestHelper $request, Html $response)
+    {
+
+        return 'I fell back' . var_dump($request);
+
+    }
+
 }

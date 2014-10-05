@@ -15,6 +15,7 @@ class Router
         'Frame\\Request',
         'Frame\\Response'
     ];
+    private $debug;
 
     public function __construct(Init $init = null)
     {
@@ -61,6 +62,7 @@ class Router
 
     /*
      * Determine the target controller based on the url path
+     * @todo Add debugging information to see how route is determined
      */
     private function parseUrlPathComponents()
     {
@@ -81,7 +83,7 @@ class Router
         // Attempt 1: Look for Routes class in project and call routeResponder method
         $method = 'routeResponder';
         $controller = $this->project . '\\Routes';
-        if (((class_exists($controller))) && (is_callable($controller . '::' . $method, true))) {
+        if (method_exists($controller, $method)) {
 
             // Call the project routeResponder method
             $route = call_user_func(array(new $controller, $method), $this->url);
@@ -124,7 +126,46 @@ class Router
 
         }
 
-        // Attempt 2: pointing to a controller with default route
+        // Attempt 2: pointing to a controller with a routeResponder method
+        $path = $pathComponents;
+        $method = 'routeResponder';
+        $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
+        if (method_exists($controller, $method)) {
+
+            $controllerClass = new $controller;
+
+            // Call routeResponder in the controller class
+            $route = call_user_func(array($controllerClass, $method), $this->url);
+
+            // If we get a string back in format $controller::$method, look for the method
+            // If the return class method starts with "\" char, look outside the project controller tree
+            if ((is_string($route)) && (strpos($route, '::') !== false)) {
+                list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
+                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                    return $this->invokeClassMethod(new $controller, $method);
+                }
+            }
+
+            // If we get a partial string result, assume it's a method response
+            if ((is_string($route)) && (strpos($route, '::') === false) && (is_callable(array($controllerClass, $route)))) {
+                return $this->invokeClassMethod($controllerClass, $route);
+            }
+
+            // Otherwise, if we get a closure back, call it
+            if (is_callable($route)) {
+                if ((is_array($route)) && (count($route) == 2)) {
+                    return $this->invokeClassMethod($route[0], $route[1]);
+                } else {
+                    $reflection = new \ReflectionFunction($route);
+                    if ($reflection->isClosure()) {
+                        return $this->invokeFunction($route);
+                    }
+                }
+            }
+
+        }
+
+        // Attempt 3: pointing to a controller with default route
         $path = $pathComponents;
         $method = 'routeDefault';
         $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
@@ -132,7 +173,7 @@ class Router
             return $this->invokeClassMethod(new $controller, $method);
         }
 
-        // Attempt 3: pointing to a specific route* method within a controller
+        // Attempt 4: pointing to a specific route* method within a controller
         $path = $pathComponents;
         $method = 'route' . array_pop($path);
         $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));

@@ -10,7 +10,7 @@ class Routes implements RoutesInterface
     public function routeResponder(Url $url)
     {
 
-        $found = preg_match("/^\/product/", $url->requestUri, $matches);
+        $found = preg_match("/^\/product([0-9]+)$/", $url->requestUri, $matches);
         if ($found) {
             return 'Products'; // look in the Products controller
         }

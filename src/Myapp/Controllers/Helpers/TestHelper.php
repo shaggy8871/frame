@@ -15,7 +15,7 @@ class TestHelper extends \Frame\Request\Get
         parent::__construct();
 
         foreach($this->toArray() as $prop => $val) {
-            $this->$prop = '*'.$val;
+            $this->get->$prop = '*'.$val;
         }
 
     }

@@ -9,7 +9,7 @@ FRAME is a dead-simple PHP framework. Our goals:
 
 Example:
 
-```
+```php
 <?php
 
 namespace Controllers;

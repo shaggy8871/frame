@@ -10,12 +10,12 @@ class Router
 
     private $project;
     private $url;
+    private $debug;
     // Order of namespace aliases for request/response parameters
     private $paramAliases = [
         'Frame\\Request',
         'Frame\\Response'
     ];
-    private $debug;
 
     public function __construct(Init $init = null)
     {
@@ -264,7 +264,13 @@ class Router
             // If we get this far, we should have the class aliased and auto-loaded
             if ($paramClass instanceof \ReflectionClass) {
                 // Instantiate parameter class and save to injection array
-                $inject[] = new $paramClass->name();
+                $paramInstance = new $paramClass->name();
+                $paramPos = $param->getPosition();
+                // If this is a response class (parameter 2), set the default view filename
+                if (($class) && ($paramPos == self::RESPONSE) && (is_callable(array($paramInstance, 'setViewFilename')))) {
+                    $this->setDefaultViewFilename($paramInstance, $reflection, $class);
+                }
+                $inject[] = $paramInstance;
             }
         }
 
@@ -282,7 +288,12 @@ class Router
                 $response->render();
             } else {
                 $responseClass = (array_key_exists(self::RESPONSE, $inject) ? $inject[self::RESPONSE] : new \Frame\Response\Html());
-                $responseClass->render($response);
+                if (is_callable(array($responseClass, 'setViewFilename'))) {
+                    $this->setDefaultViewFilename($responseClass, $reflection, $class);
+                }
+                if (is_callable(array($responseClass, 'render'))) {
+                    $responseClass->render($response);
+                }
             }
         }
 
@@ -296,6 +307,34 @@ class Router
 
         preg_match('/\[\s\<\w+?>\s([\w\\\\]+)/s', $param->__toString(), $matches);
         return isset($matches[1]) ? $matches[1] : null;
+
+    }
+
+    /*
+     * Determine the default view filename from the project, class and method where possible
+     */
+    private function setDefaultViewFilename($responseClass, $reflection, $controllerClass = null)
+    {
+
+        if (!is_callable(array($responseClass, 'setViewFilename'))) {
+            return false;
+        }
+        // Not available if it's a closure
+        if ($reflection->isClosure()) {
+            return false;
+        }
+
+        if ($controllerClass) {
+            $viewDir = str_replace('/Controllers', '/Views', str_replace('\\', '/', get_class($controllerClass)));
+        } else {
+            $viewDir = $this->project . '/Views';
+        }
+
+        // Probably need to fix this:
+        $path = getcwd() . '/src/' . $viewDir . '/';
+        $viewFilename = $path . strtolower(str_replace('route', '', $reflection->getName()));
+
+        $responseClass->setViewFilename($viewFilename);
 
     }
 

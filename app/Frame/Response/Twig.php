@@ -15,7 +15,7 @@ class Twig extends Foundation implements ResponseInterface
 {
 
     protected $contentType = 'text/html';
-    protected $extension = '.twig';
+    protected $defaultExtension = '.twig';
 
     public function __construct()
     {
@@ -35,7 +35,7 @@ class Twig extends Foundation implements ResponseInterface
 
             // Make sure we can determine which template to render
             if (!$this->viewBaseDir) {
-                throw new \Exception("Twig responder class only works within a controller.")
+                throw new \Exception("Twig responder class only works within a controller.");
             }
 
             // Check for existence of cache directory before instantiating Twig
@@ -59,7 +59,8 @@ class Twig extends Foundation implements ResponseInterface
 
         // Render a view file with a .twig extension
         $twig = $this->project->config->twig;
-        echo $twig->render($this->viewFilename . $this->extension, $params);
+        $view = $this->viewFilename . (strpos($this->viewFilename, '.') === false ? $this->defaultExtension : '');
+        echo $twig->render($view, $params);
 
     }
 

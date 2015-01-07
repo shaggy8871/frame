@@ -39,6 +39,7 @@ class Products
     public function routeDefault(Get $request, Twig $response, \Myapp\Models\Something $else)
     {
 
+//        $response->setViewFilename("Products/test.html");
         return array('this' => 'is', 'cool' => 'yeah?');
 
     }

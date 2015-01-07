@@ -35,7 +35,7 @@ class Twig extends Foundation implements ResponseInterface
 
             // Make sure we can determine which template to render
             if (!$this->viewBaseDir) {
-                throw new \Exception("Twig responder class only works within a controller.");
+                throw new \Exception("Twig responder class cannot determine view file/path automatically. Please set using \$responder->setViewBaseDir() and \$responder->setViewFilename()");
             }
 
             // Check for existence of cache directory before instantiating Twig

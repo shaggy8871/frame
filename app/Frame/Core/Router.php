@@ -349,19 +349,21 @@ class Router
             return false;
         }
 
+        // Try to auto-detect view file using controller
         if ($controllerClass) {
             // Reflect on the controllerClass
             $controllerClassReflection = new \ReflectionClass($controllerClass);
             $controllerPath = pathinfo($controllerClassReflection->getFileName());
+            // Get view filename
             $viewBaseDir = str_replace('/Controllers', '/Views', str_replace('\\', '/', $controllerPath['dirname']));
             $viewDir = $viewBaseDir . '/' . $controllerPath['filename'];
+            $viewFilename = str_replace($viewBaseDir . '/', '', $viewDir . '/' . strtolower(str_replace('route', '', $reflection->getName())));
         } else {
+            // Not found so must be specified manually
             $viewBaseDir = null;
-            $viewDir = null;
+            $viewDir = null; // ??
+            $viewFilename = null;
         }
-
-        // Get view filename
-        $viewFilename = str_replace($viewBaseDir . '/', '', $viewDir . '/' . strtolower(str_replace('route', '', $reflection->getName())));
 
         // Inject defaults into the response class
         $responseClass->setDefaults(array(

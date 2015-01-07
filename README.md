@@ -35,13 +35,13 @@ class Products
 }
 ```
 
-## RouteResponders
+## RouteResolvers
 
-Each project makes use of one or more routeResponder methods to determine how best to respond to URL requests.
+Each project makes use of one or more routeResolver methods to determine how best to respond to URL requests.
 
-If a project has a Routes.php file within the base directory, and a method called `routeResponder` is defined within, it will be called first.
+If a project has a Routes.php file within the base directory, and a method called `routeResolver` is defined within, it will be called first.
 
-The `routeResponder` method receives a Url class and expects one of the following response types:
+The `routeResolver` method receives a Url class and expects one of the following response types:
 
 1. The name of a controller class (as a string)
 2. A string in the format `Controller::Method` where the controller sits within the project's `Controllers/` folder
@@ -49,9 +49,9 @@ The `routeResponder` method receives a Url class and expects one of the followin
 4. A closure
 5. A class method array in the format `array($object, $methodName)`. If the method is static, `$object` can be a string, otherwise it must be an instantiated object.
 
-If the project's default `routeResponder` responds with the name of a controller class, the controller is instantiated and inspected for its own `routeResponder` method. This allows each controller to take charge of its own routing rules, rather than relying on a project-centric approach.
+If the project's default `routeResolver` responds with the name of a controller class, the controller is instantiated and inspected for its own `routeResolver` method. This allows each controller to take charge of its own routing rules, rather than relying on a project-centric approach.
 
-**RouteResponder example**
+**RouteResolver example**
 ```php
 <?php
 
@@ -62,7 +62,7 @@ use \Frame\Core\RoutesInterface;
 class Routes implements RoutesInterface
 {
 
-    public function routeResponder(Url $url)
+    public function routeResolver(Url $url)
     {
 
         $found = preg_match("/^\/product/", $url->requestUri, $matches);

@@ -15,7 +15,7 @@ class StdOut extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
-        $params = ($params ? $params : $this->viewParams);
+        $params = ($params ?: $this->viewParams);
 
         if (!is_string($params)) {
             throw new InvalidResponseException('StdOut response value must be a string');

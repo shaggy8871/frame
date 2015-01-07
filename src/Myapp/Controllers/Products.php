@@ -8,7 +8,7 @@ class Products
     /*
      * Handle controller specific routing queries
      */
-    public function routeResponder(Url $url)
+    public function routeResolver(Url $url)
     {
 
         $found = preg_match("/^\/products\/int/", $url->requestUri, $matches);
@@ -36,7 +36,7 @@ class Products
 
     }
 
-    public function routeDefault(Get $request, Json $response, \Myapp\Models\Something $else)
+    public function routeDefault(Get $request, Twig $response, \Myapp\Models\Something $else)
     {
 
         return array('this' => 'is', 'cool' => 'yeah?');

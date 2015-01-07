@@ -1,5 +1,9 @@
 <?php
 
+/*
+ * This is where most of the magic happens
+ */
+
 namespace Frame\Core;
 
 class Router
@@ -39,7 +43,7 @@ class Router
     {
 
         if (array_key_exists($this->url->host, $projects)) {
-            return $projects[$this->url->host];
+            return $this->getProject($projects[$this->url->host]);
         } else {
             throw new \Exception('Cannot determine project path from host ' . $this->url->host);
         }
@@ -52,11 +56,28 @@ class Router
     private function getProjectFromArgs()
     {
 
-        if ((isset($GLOBALS['argv'])) && (count($GLOBALS['argv']) > 1) && (file_exists('src/' . $GLOBALS['argv'][1]))) {
-            return $GLOBALS['argv'][1];
+        if ((isset($GLOBALS['argv'])) && (count($GLOBALS['argv']) > 1) && (file_exists($GLOBALS['argv'][1]))) {
+            return $this->getProject($GLOBALS['argv'][1]);
         } else {
             throw new \Exception('Cannot determine project path from argument ' . $GLOBALS['argv'][1]);
         }
+
+    }
+
+    /*
+     * Creates a project object
+     */
+    private function getProject($ns)
+    {
+
+        // Do we have a configuration class?
+        $configClass = $ns . '\\Config';
+        $config = (class_exists($configClass) ? new $configClass() : null);
+
+        return (object) array(
+            'ns' => $ns,
+            'config' => $config,
+        );
 
     }
 
@@ -75,25 +96,25 @@ class Router
         }
 
         // Alias in the Url class
-        $this->createAlias('Frame\\Core\\Url', $this->project . '\\Url');
-        $this->createAlias('Frame\\Core\\Url', $this->project . '\\Controllers\\Url');
+        $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Url');
+        $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Controllers\\Url');
 
-        $projectControllers = $this->project . '\\Controllers\\';
+        $projectControllers = $this->project->ns . '\\Controllers\\';
 
-        // Attempt 1: Look for Routes class in project and call routeResponder method
-        $method = 'routeResponder';
-        $controller = $this->project . '\\Routes';
+        // Attempt 1: Look for Routes class in project and call routeResolver method
+        $method = 'routeResolver';
+        $controller = $this->project->ns . '\\Routes';
         if (method_exists($controller, $method)) {
 
-            // Call the project routeResponder method
+            // Call the project routeResolver method
             $route = call_user_func(array(new $controller, $method), $this->url);
 
-            // If we get a class name back, look for another routeResponder method within
+            // If we get a class name back, look for another routeResolver method within
             if ((is_string($route)) && (strpos($route, '::') === false) && (class_exists($projectControllers . $route)) && (method_exists($projectControllers . $route, $method))) {
                 $savedRoute = $route;
                 $routeController = $projectControllers . $route;
                 $controllerClass = new $routeController;
-                // Call routeResponder in the controller class
+                // Call routeResolver in the controller class
                 $route = call_user_func(array($controllerClass, $method), $this->url);
                 // If I get a partial string result, assume it's a method response, otherwise prepare for fallback
                 if ((is_string($route)) && (strpos($route, '::') === false) && (is_callable(array($controllerClass, $route)))) {
@@ -126,15 +147,15 @@ class Router
 
         }
 
-        // Attempt 2: pointing to a controller with a routeResponder method
+        // Attempt 2: pointing to a controller with a routeResolver method
         $path = $pathComponents;
-        $method = 'routeResponder';
+        $method = 'routeResolver';
         $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
         if (method_exists($controller, $method)) {
 
             $controllerClass = new $controller;
 
-            // Call routeResponder in the controller class
+            // Call routeResolver in the controller class
             $route = call_user_func(array($controllerClass, $method), $this->url);
 
             // If we get a string back in format $controller::$method, look for the method
@@ -267,8 +288,8 @@ class Router
                 $paramInstance = new $paramClass->name();
                 $paramPos = $param->getPosition();
                 // If this is a response class (parameter 2), set the default view filename
-                if (($class) && ($paramPos == self::RESPONSE) && (is_callable(array($paramInstance, 'setViewFilename')))) {
-                    $this->setDefaultViewFilename($paramInstance, $reflection, $class);
+                if (($class) && ($paramPos == self::RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
+                    $this->setResponseDefaults($paramInstance, $reflection, $class);
                 }
                 $inject[] = $paramInstance;
             }
@@ -287,9 +308,13 @@ class Router
             if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {
                 $response->render();
             } else {
-                $responseClass = (array_key_exists(self::RESPONSE, $inject) ? $inject[self::RESPONSE] : new \Frame\Response\Html());
-                if (is_callable(array($responseClass, 'setViewFilename'))) {
-                    $this->setDefaultViewFilename($responseClass, $reflection, $class);
+                if (array_key_exists(self::RESPONSE, $inject)) {
+                    $responseClass = $inject[self::RESPONSE];
+                } else {
+                    $responseClass = new \Frame\Response\Html();
+                    if (is_callable(array($responseClass, 'setDefaults'))) {
+                        $this->setResponseDefaults($responseClass, $reflection, $class);
+                    }
                 }
                 if (is_callable(array($responseClass, 'render'))) {
                     $responseClass->render($response);
@@ -311,12 +336,12 @@ class Router
     }
 
     /*
-     * Determine the default view filename from the project, class and method where possible
+     * Inject details into the response class. Not available for closures.
      */
-    private function setDefaultViewFilename($responseClass, $reflection, $controllerClass = null)
+    private function setResponseDefaults($responseClass, $reflection, $controllerClass = null)
     {
 
-        if (!is_callable(array($responseClass, 'setViewFilename'))) {
+        if (!is_callable(array($responseClass, 'setDefaults'))) {
             return false;
         }
         // Not available if it's a closure
@@ -325,16 +350,25 @@ class Router
         }
 
         if ($controllerClass) {
-            $viewDir = str_replace('/Controllers', '/Views', str_replace('\\', '/', get_class($controllerClass)));
+            // Reflect on the controllerClass
+            $controllerClassReflection = new \ReflectionClass($controllerClass);
+            $controllerPath = pathinfo($controllerClassReflection->getFileName());
+            $viewBaseDir = str_replace('/Controllers', '/Views', str_replace('\\', '/', $controllerPath['dirname']));
+            $viewDir = $viewBaseDir . '/' . $controllerPath['filename'];
         } else {
-            $viewDir = $this->project . '/Views';
+            $viewBaseDir = null;
+            $viewDir = null;
         }
 
-        // Probably need to fix this:
-        $path = getcwd() . '/src/' . $viewDir . '/';
-        $viewFilename = $path . strtolower(str_replace('route', '', $reflection->getName()));
+        // Get view filename
+        $viewFilename = str_replace($viewBaseDir . '/', '', $viewDir . '/' . strtolower(str_replace('route', '', $reflection->getName())));
 
-        $responseClass->setViewFilename($viewFilename);
+        // Inject defaults into the response class
+        $responseClass->setDefaults(array(
+            'project' => $this->project,
+            'viewFilename' => $viewFilename,
+            'viewBaseDir' => $viewBaseDir
+        ));
 
     }
 

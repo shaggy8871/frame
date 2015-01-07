@@ -7,7 +7,7 @@ use \Frame\Core\RoutesInterface;
 class Routes implements RoutesInterface
 {
 
-    public function routeResponder(Url $url)
+    public function routeResolver(Url $url)
     {
 
         $found = preg_match("/^\/product([0-9]+)$/", $url->requestUri, $matches);

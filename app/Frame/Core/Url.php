@@ -32,7 +32,7 @@ class Url
         // Determine the script filename so we can exclude it from the parsed path
         $scriptFilename = basename($_SERVER['SCRIPT_FILENAME']);
 
-        $this->queryString = $pathComponents['query'];
+        $this->queryString = (isset($pathComponents['query']) ? $pathComponents['query'] : '');
         $this->pathComponents = [];
 
         $appFound = false;

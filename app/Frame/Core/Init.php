@@ -10,10 +10,9 @@ class Init
     public function __construct(array $projects = array())
     {
 
+        // Save projects
         $this->projects = $projects;
 
-        // Initialize config
-        // ...
         // Initialize router
         new Router($this);
 

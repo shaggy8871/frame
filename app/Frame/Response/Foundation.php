@@ -5,17 +5,37 @@ namespace Frame\Response;
 abstract class Foundation
 {
 
-    protected $contentType;
+    protected $project;
     protected $viewFilename;
+    protected $viewBaseDir;
     protected $viewParams;
+    protected $contentType;
 
     /*
-     * Set the content type to something other than the default
+     * Set defaults for the response class post instantiation
      */
-    public function setContentType($contentType)
+    public function setDefaults(array $defaults)
     {
 
-        $this->contentType = $contentType;
+        if (isset($defaults['project'])) {
+            $this->setProject($defaults['project']);
+        }
+        if (isset($defaults['viewFilename'])) {
+            $this->setViewFilename($defaults['viewFilename']);
+        }
+        if (isset($defaults['viewBaseDir'])) {
+            $this->setViewBaseDir($defaults['viewBaseDir']);
+        }
+
+    }
+
+    /*
+    * Set the project
+    */
+    public function setProject($project)
+    {
+
+        $this->project = $project;
 
     }
 
@@ -30,12 +50,32 @@ abstract class Foundation
     }
 
     /*
+    * Change the view base directory
+    */
+    public function setViewBaseDir($baseDir)
+    {
+
+        $this->viewBaseDir = $baseDir;
+
+    }
+
+    /*
      * Set the view parameters prior to rendering
      */
     public function setViewParams($params)
     {
 
         $this->viewParams = $params;
+
+    }
+
+    /*
+    * Set the content type to something other than the default
+    */
+    public function setContentType($contentType)
+    {
+
+        $this->contentType = $contentType;
 
     }
 

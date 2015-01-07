@@ -13,7 +13,7 @@ class Json extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
-        $params = ($params ? $params : $this->viewParams);
+        $params = ($params ?: $this->viewParams);
 
         if (!headers_sent()) {
             header('Content-Type: ' . $this->contentType);

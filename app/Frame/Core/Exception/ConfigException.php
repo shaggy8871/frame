@@ -1,8 +1,8 @@
 <?php
 
-namespace Frame\Response\Exception;
+namespace Frame\Core\Exception;
 
-class InvalidResponseException extends \Exception
+class ConfigException extends \Exception
 {
 
     public function __construct($message, $code = 0, \Exception $previous = null) {

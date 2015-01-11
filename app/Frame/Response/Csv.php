@@ -2,6 +2,8 @@
 
 namespace Frame\Response;
 
+use Frame\Response\Exception\InvalidResponseException;
+
 class Csv extends Foundation implements ResponseInterface
 {
 
@@ -18,6 +20,7 @@ class Csv extends Foundation implements ResponseInterface
         }
 
         if (!headers_sent()) {
+            http_response_code($this->statusCode);
             header('Content-Type: ' . $this->contentType);
             if ($this->downloadFilename != null) {
                 header('Content-Disposition: attachment; filename="' . $this->filename . '"');

@@ -5,6 +5,18 @@ namespace Myapp\Controllers;
 class Index
 {
 
+    protected $project;
+
+    /*
+     * An alternative to using the Controller class
+     */
+    public function __construct(Project $project)
+    {
+
+        $this->project = $project;
+
+    }
+
     public function routeDefault(Get $request)
     {
 

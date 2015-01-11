@@ -2,7 +2,7 @@
 
 namespace Frame\Response\Exception;
 
-class InvalidResponseException extends \Exception
+class ResponseConfigException extends \Exception
 {
 
     public function __construct($message, $code = 0, \Exception $previous = null) {

@@ -2,14 +2,30 @@
 
 namespace Frame\Response;
 
+use Frame\Core\Project;
+use Frame\Response\Exception\ResponseConfigException;
+
 abstract class Foundation
 {
 
     protected $project;
-    protected $viewFilename;
-    protected $viewBaseDir;
-    protected $viewParams;
-    protected $contentType;
+    protected $viewDir = '';
+    protected $viewFilename = '';
+    protected $viewParams = [];
+    protected $statusCode = 200;
+    protected $contentType = 'text/html';
+
+    public function __construct(Project $project = null)
+    {
+
+        $this->project = ($project ? $project : new Project('', '', new \stdClass()));
+
+        // Attempt to auto-detect the view directory path
+        if ($this->project->path) {
+            $this->setViewDir($this->project->path . '/Views');
+        }
+
+    }
 
     /*
      * Set defaults for the response class post instantiation
@@ -20,11 +36,15 @@ abstract class Foundation
         if (isset($defaults['project'])) {
             $this->setProject($defaults['project']);
         }
+        if (isset($defaults['viewDir'])) {
+            $this->setViewDir($defaults['viewDir']);
+        }
         if (isset($defaults['viewFilename'])) {
             $this->setViewFilename($defaults['viewFilename']);
         }
-        if (isset($defaults['viewBaseDir'])) {
-            $this->setViewBaseDir($defaults['viewBaseDir']);
+
+        if (is_array($defaults['view'])) {
+            $this->setView($defaults['view']);
         }
 
     }
@@ -37,6 +57,37 @@ abstract class Foundation
 
         $this->project = $project;
 
+        return $this; // allow for chaining
+
+    }
+
+    /*
+    * Change the view filename and base directory
+    */
+    public function setView(array $view)
+    {
+
+        if ((isset($view['dir'])) && (isset($view['filename']))) {
+            $this->viewDir = $view['dir'];
+            $this->viewFilename = $view['filename'];
+        } else {
+            throw new ResponseConfigException("Parameter 1 of setView must contain keys 'dir' and 'filename'");
+        }
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+    * Change the view base directory
+    */
+    public function setViewDir($dir)
+    {
+
+        $this->viewDir = $dir;
+
+        return $this; // allow for chaining
+
     }
 
     /*
@@ -47,15 +98,7 @@ abstract class Foundation
 
         $this->viewFilename = $filename;
 
-    }
-
-    /*
-    * Change the view base directory
-    */
-    public function setViewBaseDir($baseDir)
-    {
-
-        $this->viewBaseDir = $baseDir;
+        return $this; // allow for chaining
 
     }
 
@@ -67,6 +110,20 @@ abstract class Foundation
 
         $this->viewParams = $params;
 
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Set the response status code
+     */
+    public function setStatusCode($statusCode)
+    {
+
+        $this->statusCode = $statusCode;
+
+        return $this; // allow for chaining
+
     }
 
     /*
@@ -76,6 +133,8 @@ abstract class Foundation
     {
 
         $this->contentType = $contentType;
+
+        return $this; // allow for chaining
 
     }
 

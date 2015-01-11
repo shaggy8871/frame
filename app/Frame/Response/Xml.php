@@ -20,6 +20,7 @@ class Xml extends Foundation implements ResponseInterface
         }
 
         if (!headers_sent()) {
+            http_response_code($this->statusCode);
             header('Content-Type: ' . $this->contentType);
         }
 

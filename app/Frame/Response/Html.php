@@ -13,6 +13,7 @@ class Html extends Foundation implements ResponseInterface
         $params = ($params ?: $this->viewParams);
 
         if (!headers_sent()) {
+            http_response_code($this->statusCode);
             header('Content-Type: ' . $this->contentType);
         }
 

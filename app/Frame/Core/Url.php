@@ -35,7 +35,7 @@ class Url
         $this->queryString = (isset($pathComponents['query']) ? $pathComponents['query'] : '');
         $this->pathComponents = [];
 
-        $appFound = false;
+        $appFound = !in_array($scriptFilename, $pathSplit);
         foreach($pathSplit as $pathItem) {
             if ($appFound) {
                 if ($pathItem) {

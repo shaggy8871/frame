@@ -2,7 +2,7 @@
 
 namespace Myapp\Controllers;
 
-class Products
+class Products extends Controller
 {
 
     /*
@@ -39,8 +39,10 @@ class Products
     public function routeDefault(Get $request, Twig $response, \Myapp\Models\Something $else)
     {
 
-//        $response->setViewFilename("Products/test.html");
-        return array('this' => 'is', 'cool' => 'yeah?');
+        return $response
+            ->setViewFilename("Products/test.html")
+            ->setViewParams(array('this' => 'is', 'cool' => 'yeah?'));
+//        return array('this' => 'is', 'cool' => 'yeah?');
 
     }
 
@@ -58,10 +60,21 @@ class Products
 
     }
 
+    public function routeDash_Test(Get $request, Html $response)
+    {
+
+        $response = new \Frame\Response\Twig($this->project);
+        $response
+            ->setViewFilename("Products/test.html")
+            ->setViewParams(array('this' => 'ain\'t', 'cool' => 'no!'))
+            ->render();
+
+    }
+
     public function anotherMethod(Get $request, Json $response)
     {
 
-        $response->setViewParams(array('this'));
+        $response->setViewParams(array('this', 'that'));
         return $response;
 
     }

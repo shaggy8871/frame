@@ -61,7 +61,7 @@ class Url
             }
         }
 
-        $this->requestUri = str_replace($scriptFilename . '/', '', $requestUri);
+        $this->requestUri = $_SERVER['REQUEST_URI'];
 
     }
 

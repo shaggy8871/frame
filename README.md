@@ -18,7 +18,7 @@ In composer.json:
     }
 ],
 "require": {
-    "FRAME/FRAME": "master"
+    "FRAME/FRAME": "dev-master"
 }
 ```
 

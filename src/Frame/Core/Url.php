@@ -61,7 +61,7 @@ class Url
             }
         }
 
-        $this->requestUri = '/' . implode('/', $this->pathComponents);
+        $this->requestUri = str_replace($scriptFilename . '/', '', $requestUri);
 
     }
 

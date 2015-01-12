@@ -1,5 +1,5 @@
 {
-    "name": "shaggy8871/frame",
+    "name": "FRAME/FRAME",
     "description": "FRAME is a dead-simple PHP framework",
     "license": "MIT",
     "authors": [
@@ -10,11 +10,14 @@
     ],
     "minimum-stability": "dev",
     "require": {
-
+        "php": ">=5.4.1",
     },
     "autoload": {
         "psr-0": {
-            "": ["src/", "app/"]
+            "Frame\\": "src/Frame/"
         }
+    },
+    "suggest": {
+        "twig/twig": "FRAME plays nicely with the Twig templating engine",
     }
 }

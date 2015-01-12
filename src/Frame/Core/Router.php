@@ -75,7 +75,7 @@ class Router
     private function createProject($project)
     {
 
-        if (is_a($project, 'Frame\Core\Project')) {
+        if (is_a($project, 'Frame\\Core\\Project')) {
             return $project;
         } else
         if (is_array($project)) {

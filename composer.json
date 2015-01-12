@@ -18,6 +18,6 @@
         }
     },
     "suggest": {
-        "twig/twig": "FRAME plays nicely with the Twig templating engine",
+        "twig/twig": "FRAME plays nicely with the Twig templating engine"
     }
 }

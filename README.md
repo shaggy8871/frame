@@ -7,6 +7,28 @@ FRAME is a dead-simple PHP framework. Our goals:
 2. No yaml or ini configuration files - everything is configurable via PHP itself
 3. Heavy use of dependency injection and aliasing to simplify developer interface.
 
+Installation:
+
+In composer.json:
+```
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/shaggy8871/FRAME"
+    }
+],
+"require": {
+    "FRAME/FRAME": "master"
+}
+```
+
+Then run:
+```
+composer install
+```
+
+[Grab the sample FRAME application](https://github.com/shaggy8871/FRAME-sample-app)
+
 Example:
 
 ```php

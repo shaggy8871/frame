@@ -29,11 +29,16 @@ class Url
         // Determine the script filename so we can exclude it from the parsed path
         $scriptFilename = basename($_SERVER['SCRIPT_FILENAME']);
 
-        // Work from a consistent REQUEST_URI parameter
+        // If the REQUEST_URI cannot be determined automatically, specify it as $_SERVER['FRAME_REQUEST_URI'] = ...
+        if (isset($_SERVER['FRAME_REQUEST_URI'])) {
+            $requestUri = $_SERVER['FRAME_REQUEST_URI'];
+        } else
+        // Otherwise we'll attempt to guess it
         if (strpos($_SERVER['REQUEST_URI'], $scriptFilename) === false) {
             $base = str_replace($scriptFilename, '', $_SERVER['SCRIPT_NAME']);
             $requestUri = str_replace($base, $base . $scriptFilename . '/', $_SERVER['REQUEST_URI']);
         } else {
+        // Finally, we default to what the server tells us
             $requestUri = $_SERVER['REQUEST_URI'];
         }
 

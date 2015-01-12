@@ -26,16 +26,24 @@ class Url
         $this->host = $_SERVER['HTTP_HOST'];
         $this->port = $_SERVER['SERVER_PORT'];
 
-        $pathComponents = parse_url($this->scheme . '://' . $this->host . $_SERVER['REQUEST_URI']);
-        $pathSplit = explode('/', substr($pathComponents['path'], 1));
-
         // Determine the script filename so we can exclude it from the parsed path
         $scriptFilename = basename($_SERVER['SCRIPT_FILENAME']);
+
+        // Work from a consistent REQUEST_URI parameter
+        if (strpos($_SERVER['REQUEST_URI'], $scriptFilename) === false) {
+            $base = str_replace($scriptFilename, '', $_SERVER['SCRIPT_NAME']);
+            $requestUri = str_replace($base, $base . $scriptFilename . '/', $_SERVER['REQUEST_URI']);
+        } else {
+            $requestUri = $_SERVER['REQUEST_URI'];
+        }
+
+        $pathComponents = parse_url($this->scheme . '://' . $this->host . $requestUri);
+        $pathSplit = explode('/', substr($pathComponents['path'], 1));
 
         $this->queryString = (isset($pathComponents['query']) ? $pathComponents['query'] : '');
         $this->pathComponents = [];
 
-        $appFound = !in_array($scriptFilename, $pathSplit);
+        $appFound = false;
         foreach($pathSplit as $pathItem) {
             if ($appFound) {
                 if ($pathItem) {

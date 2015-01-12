@@ -16,7 +16,7 @@ class Project
     {
 
         $this->ns = $ns;
-        $this->path = ($path ? getcwd() . '/' . $path . '/' : '') . $ns;
+        $this->path = ($path ? realpath($path) . '/' : '') . $ns;
 
         // Do we have a configuration class?
         $configClass = $ns . '\\Config';

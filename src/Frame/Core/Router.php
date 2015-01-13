@@ -338,7 +338,7 @@ class Router
                 }
             }
             // Special case for a Url object, send in the one we already have
-            if ($paramClass instanceof Url) {
+            if ($paramClass->name == 'Frame\\Core\\Url') {
                 $inject[] = $this->url;
             } else
             // If we get this far, we should have the class aliased and auto-loaded

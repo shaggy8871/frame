@@ -337,6 +337,10 @@ class Router
                     throw new ClassNotFoundException($alias, ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
                 }
             }
+            // Special case for a Url object, send in the one we already have
+            if ($paramClass instanceof Url) {
+                $inject[] = $this->url;
+            } else
             // If we get this far, we should have the class aliased and auto-loaded
             if ($paramClass instanceof \ReflectionClass) {
                 // Instantiate parameter class and save to injection array

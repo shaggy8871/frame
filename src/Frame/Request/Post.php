@@ -15,6 +15,8 @@ class Post extends Request
             $this->$key = $value;
         }
 
+        parent::__construct();
+
     }
 
 }

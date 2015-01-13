@@ -17,6 +17,8 @@ class Get extends Request
             $this->get[$key] = $value;
         }
 
+        parent::__construct();
+
     }
 
     /*

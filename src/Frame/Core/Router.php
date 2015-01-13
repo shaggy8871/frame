@@ -222,7 +222,7 @@ class Router
                 return $this->invokeClassMethod(new $controller($this->project), $method);
             }
             // Attempt 3.2: look for a method in the Index controller
-            $method = 'route' . $lookupName;
+            $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
             $controller = $projectControllers . 'Index';
             if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
                 return $this->invokeClassMethod(new $controller($this->project), $method);

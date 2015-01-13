@@ -1,7 +1,7 @@
 FRAME
 =====
 
-FRAME is a dead-simple PHP framework. Our goals:
+FRAME is a bare-bones PHP framework. Our goals:
 
 1. No bulky installs
 2. No yaml or ini configuration files - everything is configurable via PHP itself

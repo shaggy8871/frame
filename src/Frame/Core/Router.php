@@ -16,11 +16,11 @@ class Router
 
     const ROUTE_RESOLVER = 'routeResolver';
     const ROUTE_NOTFOUND = 'routeNotFound';
+    const ROUTE_DEFAULT  = 'routeDefault';
     const RESPONSE_PARAM = 1;
 
     private $project;
     private $url;
-    private $debug;
     // Order of namespace aliases for request/response parameters
     private $paramAliases = [
         'Frame\\Request',
@@ -202,29 +202,59 @@ class Router
 
         }
 
-        // Attempt 3: pointing to a controller with default route
-        $path = $pathComponents;
-        $method = 'routeDefault';
-        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
-        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-            return $this->invokeClassMethod(new $controller($this->project), $method);
-        }
-
-        // Attempt 4: pointing to a specific route* method within a controller
-        $path = $pathComponents;
-        $method = 'route' . array_pop($path);
-        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
-        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-            return $this->invokeClassMethod(new $controller($this->project), $method);
+        // Attempt 3: pointing to a specific route* method within the controller
+        if (count($pathComponents) > 1) {
+            $path = $pathComponents;
+            $controllerClass = array_shift($path);
+            $methodName = array_shift($path);
+            $method = ($methodName != null ? 'route' . $methodName : self::ROUTE_DEFAULT);
+            $controller = $projectControllers . $controllerClass;
+            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                return $this->invokeClassMethod(new $controller($this->project), $method);
+            }
+        } else {
+            $path = $pathComponents;
+            $lookupName = array_shift($path);
+            // Attempt 3.1: check for a controller with routeDefault method
+            $method = self::ROUTE_DEFAULT;
+            $controller = $projectControllers . $lookupName;
+            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                return $this->invokeClassMethod(new $controller($this->project), $method);
+            }
+            // Attempt 3.2: look for a method in the Index controller
+            $method = 'route' . $lookupName;
+            $controller = $projectControllers . 'Index';
+            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                return $this->invokeClassMethod(new $controller($this->project), $method);
+            }
         }
 
         // Can't determine route, so start fallback steps
+        return $this->routeNotFound();
+
+    }
+
+    /*
+     * When a route cannot be determined, fall back in a controlled sequence
+     */
+    private function routeNotFound()
+    {
+
+        // @todo: Remove duplicate code above/below
+        $pathComponents = $this->url->pathComponents;
+
+        // Iterate through each and convert to class or method name
+        foreach($pathComponents as &$pathComponent) {
+            $pathComponent = str_replace('-', '_', ucfirst($pathComponent));
+        }
+
+        $projectControllers = $this->project->ns . '\\Controllers\\';
 
         // Attempt 1: if we have a controller class, look for a routeNotFound method
         $path = $pathComponents;
         $method = self::ROUTE_NOTFOUND;
-        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
-        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+        $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
+        if ((class_exists($controller)) && (is_callable($controller . '::' . $method))) {
             return (new $controller($this->project))->$method($this->url, $this->project);
         }
 
@@ -243,7 +273,7 @@ class Router
     {
 
         if (!is_callable(array($class, $method))) {
-            throw new RouteNotFoundException($this->url, $this->project);
+            return $this->routeNotFound();
         }
 
         $this->invokeCallable(new \ReflectionMethod($class, $method), $class);
@@ -260,7 +290,7 @@ class Router
     {
 
         if (!is_callable($function)) {
-            throw new RouteNotFoundException($this->url, $this->project);
+            return $this->routeNotFound();
         }
 
         $this->invokeCallable(new \ReflectionFunction($function));
@@ -394,6 +424,16 @@ class Router
         if ((class_exists($from)) && (!class_exists($to))) {
             class_alias($from, $to);
         }
+
+    }
+
+    /*
+     * Return the parsed url variable
+     */
+    public function getUrl()
+    {
+
+        return $this->url;
 
     }
 

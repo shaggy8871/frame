@@ -37,7 +37,7 @@ class Init
 
         // Initialize router
         try {
-            new Router($this);
+            $router = new Router($this);
         } catch (RouteNotFoundException $e) {
             if ($this->onRouteNotFound) {
                 call_user_func($this->onRouteNotFound, [

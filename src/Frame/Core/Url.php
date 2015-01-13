@@ -34,7 +34,7 @@ class Url
             (isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $_SERVER['REQUEST_URI']
         ));
 
-        $pathComponents = parse_url($this->scheme . '://' . $this->host . $requestUri);
+        $pathComponents = parse_url($this->scheme . '://' . $this->host . $requestUri . (isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
 
         $this->requestUri = $requestUri;
         $this->pathComponents = explode('/', substr($pathComponents['path'], 1));

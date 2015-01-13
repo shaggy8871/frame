@@ -14,8 +14,9 @@ use Frame\Core\Exception\ClassNotFoundException;
 class Router
 {
 
-    const REQUEST = 0;
-    const RESPONSE = 1;
+    const ROUTE_RESOLVER = 'routeResolver';
+    const ROUTE_NOTFOUND = 'routeNotFound';
+    const RESPONSE_PARAM = 1;
 
     private $project;
     private $url;
@@ -117,7 +118,7 @@ class Router
         $this->createAlias('Frame\\Core\\Controller', $this->project->ns . '\\Controllers\\Controller');
 
         // Attempt 1: Look for Routes class in project and call routeResolver method
-        $method = 'routeResolver';
+        $method = self::ROUTE_RESOLVER;
         $controller = $this->project->ns . '\\Routes';
         if (method_exists($controller, $method)) {
 
@@ -164,7 +165,7 @@ class Router
 
         // Attempt 2: pointing to a controller with a routeResolver method
         $path = $pathComponents;
-        $method = 'routeResolver';
+        $method = self::ROUTE_RESOLVER;
         $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
         if (method_exists($controller, $method)) {
 
@@ -217,8 +218,17 @@ class Router
             return $this->invokeClassMethod(new $controller($this->project), $method);
         }
 
-        // Can't parse
-        // @todo Handle this better, with a 404 or exception screen
+        // Can't determine route, so start fallback steps
+
+        // Attempt 1: if we have a controller class, look for a routeNotFound method
+        $path = $pathComponents;
+        $method = self::ROUTE_NOTFOUND;
+        $controller = $projectControllers . (empty($path) ? 'Index' : implode('\\', $path));
+        if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+            return (new $controller($this->project))->$method($this->url, $this->project);
+        }
+
+        // Finally, fail with an exception that can be trapped and handled
         throw new RouteNotFoundException($this->url, $this->project);
 
     }
@@ -303,7 +313,7 @@ class Router
                 $paramInstance = new $paramClass->name($this->project);
                 $paramPos = $param->getPosition();
                 // If this is a response class (parameter 2), set the default view filename
-                if (($class) && ($paramPos == self::RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
+                if (($class) && ($paramPos == self::RESPONSE_PARAM) && (is_callable(array($paramInstance, 'setDefaults')))) {
                     $this->setResponseDefaults($paramInstance, $reflection, $class);
                 }
                 $inject[] = $paramInstance;
@@ -323,8 +333,8 @@ class Router
             if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {
                 $response->render();
             } else {
-                if (array_key_exists(self::RESPONSE, $inject)) {
-                    $responseClass = $inject[self::RESPONSE];
+                if (array_key_exists(self::RESPONSE_PARAM, $inject)) {
+                    $responseClass = $inject[self::RESPONSE_PARAM];
                 } else {
                     $responseClass = new \Frame\Response\Html($this->project);
                     if (is_callable(array($responseClass, 'setDefaults'))) {

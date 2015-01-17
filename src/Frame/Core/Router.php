@@ -17,7 +17,8 @@ class Router
     const ROUTE_RESOLVER = 'routeResolver';
     const ROUTE_NOTFOUND = 'routeNotFound';
     const ROUTE_DEFAULT  = 'routeDefault';
-    const RESPONSE_PARAM = 1;
+    const PARAM_REQUEST  = 0;
+    const PARAM_RESPONSE = 1;
 
     private $project;
     private $url;
@@ -337,17 +338,23 @@ class Router
                     throw new ClassNotFoundException($alias, ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
                 }
             }
-            // Special case for a Url object, send in the one we already have
+            // Special case for a Url and Project type hints, send in the one we already have
             if ($paramClass->name == 'Frame\\Core\\Url') {
                 $inject[] = $this->url;
             } else
+            if ($paramClass->name == 'Frame\\Core\\Project') {
+                $inject[] = $this->project;
+            } else
             // If we get this far, we should have the class aliased and auto-loaded
             if ($paramClass instanceof \ReflectionClass) {
-                // Instantiate parameter class and save to injection array
-                $paramInstance = new $paramClass->name($this->project);
                 $paramPos = $param->getPosition();
+                if ($paramPos == self::PARAM_REQUEST) {
+                    $paramInstance = $this->instantiateRequestClass($param, $paramClass);
+                } else {
+                    $paramInstance = new $paramClass->name($this->project);
+                }
                 // If this is a response class (parameter 2), set the default view filename
-                if (($class) && ($paramPos == self::RESPONSE_PARAM) && (is_callable(array($paramInstance, 'setDefaults')))) {
+                if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
                     $this->setResponseDefaults($paramInstance, $reflection, $class);
                 }
                 $inject[] = $paramInstance;
@@ -367,8 +374,8 @@ class Router
             if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {
                 $response->render();
             } else {
-                if (array_key_exists(self::RESPONSE_PARAM, $inject)) {
-                    $responseClass = $inject[self::RESPONSE_PARAM];
+                if (array_key_exists(self::PARAM_RESPONSE, $inject)) {
+                    $responseClass = $inject[self::PARAM_RESPONSE];
                 } else {
                     $responseClass = new \Frame\Response\Html($this->project);
                     if (is_callable(array($responseClass, 'setDefaults'))) {
@@ -379,6 +386,48 @@ class Router
                     $responseClass->render($response);
                 }
             }
+        }
+
+    }
+
+    /*
+    * Special case for request parameters
+    * If the parameter class contains a static createFromRequest method,
+    * ask it to instantiate the class for us using the request data supplied.
+    */
+    private function instantiateRequestClass($param, $paramClass)
+    {
+
+        try {
+
+            $paramFactory = $paramClass->getMethod('createFromRequest');
+            // Method exists, but is it static?
+            if (!$paramFactory->isStatic()) {
+                // Fall back
+                return new $paramClass->name($this->project);
+            }
+
+            // Create a local alias for the Request\Request class
+            $this->createAlias('Frame\\Request\\Request', $paramClass->getNamespaceName() . '\\Request');
+
+            $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request($this->project));
+
+            // If we don't get an object back, set it to null for safety
+            if (!is_object($paramInstance)) {
+                $paramInstance = null;
+            }
+
+            // If the parameter doesn't allow null values, throw an error to prevent
+            // the compiler from doing so
+            if (($paramInstance == null) && (!$param->allowsNull())) {
+                throw new ConfigException("Method " . $paramClass->name . "::createFromRequest returned null or a non-object, and Request parameter does not accept nulls.");
+            }
+
+            return $paramInstance;
+
+        } catch (\ReflectionException $e) {
+            // Didn't work so continue as normal
+            return new $paramClass->name($this->project);
         }
 
     }

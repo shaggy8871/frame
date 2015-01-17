@@ -123,8 +123,11 @@ class Routes implements RoutesInterface
 ```
 
 ## Notes:
+(More comprehensive tutorials coming soon)
 
 1. `Get` and `Twig` classes in the example above are automatically aliased to classes `\Frame\Request\Get` and `\Frame\Response\Twig`.
 2. Additional classes can be injected by appending them to the parameter list of a controller method, but must be fully namespaced.
-3. If you don't know the output type at compile time, use the generic `Response` class and call the `setType()` method before rendering.
-4. The view file is automatically selected based on the controller name and output type. In the example above, the view filename would be /Views/Products/default.html.twig. Each `Response` class has its own fallback method if the view file is not found.
+3. If the request class has a static method called "createFromRequest", it will be
+asked to instantiate the class using the request data supplied as parameter.
+4. If you don't know the output type at compile time, use the generic `Response` class and call the `setType()` method before rendering.
+5. The view file is automatically selected based on the controller name and output type. In the example above, the view filename would be /Views/Products/default.html.twig. Each `Response` class has its own fallback method if the view file is not found.

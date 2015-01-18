@@ -28,69 +28,11 @@ class Router
         'Frame\\Response'
     ];
 
-    public function __construct(Init $init = null)
+    public function __construct(Project $project, Url $url = null)
     {
 
-        if (php_sapi_name() == 'cli') {
-            // @todo Handle console apps
-            $this->project = $this->getProjectFromArgs();
-        } else {
-            // Handle web apps
-            $this->url = new Url();
-            $this->project = $this->getProjectFromHost($init->projects);
-            $this->parseUrlPathComponents();
-        }
-
-    }
-
-    /*
-     * Determine the project folder from the hostname
-     */
-    private function getProjectFromHost($projects)
-    {
-
-        if (array_key_exists($this->url->host, $projects)) {
-            return $this->createProject($projects[$this->url->host]);
-        } else {
-            throw new ConfigException('Cannot determine project path from host ' . $this->url->host);
-        }
-
-    }
-
-    /*
-     * Determine the project folder from the first CLI argument
-     */
-    private function getProjectFromArgs()
-    {
-
-        if ((isset($GLOBALS['argv'])) && (count($GLOBALS['argv']) > 1) && (file_exists($GLOBALS['argv'][1]))) {
-            return $this->createProject($GLOBALS['argv'][1]);
-        } else {
-            throw new ConfigException('Cannot determine project path from argument ' . $GLOBALS['argv'][1]);
-        }
-
-    }
-
-    /*
-     * Creates a project object
-     */
-    private function createProject($project)
-    {
-
-        if (is_a($project, 'Frame\\Core\\Project')) {
-            return $project;
-        } else
-        if (is_array($project)) {
-            $project = array_merge($project, array_fill(0, 2, false));
-            list($ns, $path, $debugMode) = $project;
-            if (!$ns) {
-                throw new ConfigException("Project configuration must have a namespace assigned");
-            }
-        } else {
-            list($ns, $path, $debugMode) = array($project, '', false);
-        }
-
-        return new Project($ns, $path, $debugMode);
+        $this->project = $project;
+        $this->url = $url;
 
     }
 
@@ -98,8 +40,16 @@ class Router
      * Determine the target controller based on the url path
      * @todo Add debugging information to see how route is determined
      */
-    private function parseUrlPathComponents()
+    public function parseUrl(Url $url = null)
     {
+
+        if ($url) {
+            $this->url = $url; // override existing
+        }
+
+        if (!($this->url instanceof Url)) {
+            throw new ConfigException('No Url instance supplied for parser.');
+        }
 
         $pathComponents = $this->url->pathComponents;
 
@@ -481,7 +431,7 @@ class Router
     }
 
     /*
-     * Return the parsed url variable
+     * Return the parsed url class that we're using
      */
     public function getUrl()
     {

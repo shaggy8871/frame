@@ -12,6 +12,9 @@
     "require": {
         "php": ">=5.4.1"
     },
+    "require-dev": {
+        "phpunit/phpunit": "4.4.*"
+    },
     "autoload": {
         "psr-0": {
             "Frame\\": "src/"

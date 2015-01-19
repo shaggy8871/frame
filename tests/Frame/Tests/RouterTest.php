@@ -3,6 +3,8 @@
 namespace Frame\Tests;
 
 use Frame\Core\Project;
+use Frame\Core\Url;
+use Frame\Core\UrlFactory;
 use Frame\Core\Router;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
@@ -15,40 +17,108 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     public function __construct()
     {
 
-        $this->router = new Router(new Project('Frame\\Tests', 'Frame/Tests', true));
+        $this->router = new Router(new Project('Frame\\Tests', '', true));
 
     }
 
-    public function testWebHomePage()
+    public function testUrlFactoryAutoDetect()
     {
 
-        $this->expectOutputString('WebHomePage');
+        // Instantiate test $_SERVER variables
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['HTTP_HOST'] = 'www.testframe.com';
+        $_SERVER['SERVER_PORT'] = 80;
+        $_SERVER['SCRIPT_FILENAME'] = 'index.php';
+        $_SERVER['PATH_INFO'] = '/';
+        $_SERVER['QUERY_STRING'] = 'a=b';
+
+        $url = UrlFactory::autodetect();
+
+        // Make sure we get it back as expected
+        $this->assertEquals($url->requestMethod, 'GET');
+        $this->assertEquals($url->requestUri, '/');
+        $this->assertEquals($url->scheme, 'http');
+        $this->assertEquals($url->host, 'www.testframe.com');
+        $this->assertEquals($url->port, 80);
+        $this->assertEquals($url->pathComponents, ['']);
+        $this->assertEquals($url->queryString, 'a=b');
+
+    }
+
+    public function testIndexRouteDefault()
+    {
+
+        $this->expectOutputString('RouteDefault');
 
         $this->router->parseUrl($this->generateUrl('/'));
 
     }
 
-    public function testWebFullHomePage()
+    public function testWebRouteJsonResponse()
     {
 
-        $this->expectOutputString('WebHomePage');
+        $this->expectOutputString(json_encode(['json' => true]));
 
-        $this->router->parseUrl($this->generateUrl('/index.php/'));
+        $this->router->parseUrl($this->generateUrl('/jsonResponse'));
+
+    }
+
+    public function testWebRouteTwigResponse()
+    {
+
+        $this->expectOutputRegex("/RouteTwigResponseOkay/");
+
+        $this->router->parseUrl($this->generateUrl('/twigResponse'));
+
+    }
+
+    public function testProductsRouteDefault()
+    {
+
+        $this->expectOutputString('ProductsRouteDefault');
+
+        $this->router->parseUrl($this->generateUrl('/products'));
+
+    }
+
+    public function testProductsRouteDefaultWithTrailingSlash()
+    {
+
+        $this->expectOutputString('ProductsRouteDefault');
+
+        $this->router->parseUrl($this->generateUrl('/products/'));
+
+    }
+
+    public function testProductsRouteSubDir()
+    {
+
+        $this->expectOutputString('ProductsRouteSubDir');
+
+        $this->router->parseUrl($this->generateUrl('/products/subdir'));
+
+    }
+
+    public function testProductsRouteSubDirWithTrailingSlash()
+    {
+
+        $this->expectOutputString('ProductsRouteSubDir');
+
+        $this->router->parseUrl($this->generateUrl('/products/subdir/'));
 
     }
 
     /*
-     * Construct a UrlSim object using a dummy host and the supplied requestUri
+     * Construct a Url object using the supplied requestUri
      */
     private function generateUrl($requestUri)
     {
 
-        $pathComponents = parse_url('http://www.testframe.com' . $requestUri);
+        $pathComponents = explode('/', substr($requestUri, 1));
 
-        $url = new UrlSim();
-        $url->pathComponents = explode('/', substr($pathComponents['path'], 1));
-
-        return $url;
+        return new Url([
+            'pathComponents' => $pathComponents
+        ]);
 
     }
 

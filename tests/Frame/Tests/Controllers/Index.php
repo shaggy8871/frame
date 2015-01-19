@@ -8,7 +8,28 @@ class Index extends Controller
     public function routeDefault()
     {
 
-        return "WebHomePage";
+        return "RouteDefault";
+
+    }
+
+    public function routeJsonResponse(Get $request, Json $response)
+    {
+
+        return array('json' => true);
+
+    }
+
+    public function routeTwigResponse(Get $request, Twig $response)
+    {
+
+        return array('twig' => 'Okay');
+
+    }
+
+    public function routeProducts()
+    {
+
+        throw new Exception('Routing error, should route to Products::routeDefault');
 
     }
 

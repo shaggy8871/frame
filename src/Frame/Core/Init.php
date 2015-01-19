@@ -42,14 +42,12 @@ class Init
             if (php_sapi_name() == 'cli') {
                 // Handle console apps
                 // @todo: finish!
-                $project = $this->getProjectFromArgs();
-                $router = new Router($project);
+                $router = new Router($this->getProjectFromArgs());
             } else {
                 // Handle web apps
-                $url = new Url();
-                $project = $this->getProjectFromUrl($url);
-                $router = new Router($project, $url);
-                $router->parseUrl();
+                $url = UrlFactory::autodetect();
+                $router = new Router($this->getProjectFromUrl($url));
+                $router->parseUrl($url);
             }
 
         } catch (RouteNotFoundException $e) {

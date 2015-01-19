@@ -3,7 +3,7 @@
 namespace Frame\Core;
 
 /*
- * The base Url class splits the URL into workable components
+ * The base Url class stores the URL in workable components
  */
 
 class Url
@@ -17,31 +17,30 @@ class Url
     protected $pathComponents;
     protected $queryString;
 
-    public function __construct()
+    public function __construct(array $urlComponents)
     {
 
-        // Basic lookup
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->scheme = isset($_SERVER['HTTPS']) ? 'https' : 'http';
-        $this->host = $_SERVER['HTTP_HOST'];
-        $this->port = $_SERVER['SERVER_PORT'];
-
-        // Determine the script filename so we can exclude it from the parsed path
-        $scriptFilename = basename($_SERVER['SCRIPT_FILENAME']);
-        // Determine the correct request Uri
-        $requestUri =
-            (isset($_SERVER['FRAME_REQUEST_URI']) ? $_SERVER['FRAME_REQUEST_URI'] :
-            (isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $_SERVER['REQUEST_URI']
-        ));
-        if (strpos($requestUri, '?') !== false) {
-            $requestUri = strstr($requestUri, '?', true);
+        if (isset($urlComponents['requestMethod'])) {
+            $this->requestMethod = $urlComponents['requestMethod'];
         }
-
-        $pathComponents = parse_url($this->scheme . '://' . $this->host . $requestUri . (isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
-
-        $this->requestUri = $requestUri;
-        $this->pathComponents = explode('/', substr($pathComponents['path'], 1));
-        $this->queryString = (isset($pathComponents['query']) ? $pathComponents['query'] : '');
+        if (isset($urlComponents['requestUri'])) {
+            $this->requestUri = $urlComponents['requestUri'];
+        }
+        if (isset($urlComponents['scheme'])) {
+            $this->scheme = $urlComponents['scheme'];
+        }
+        if (isset($urlComponents['host'])) {
+            $this->host = $urlComponents['host'];
+        }
+        if (isset($urlComponents['port'])) {
+            $this->port = $urlComponents['port'];
+        }
+        if (isset($urlComponents['pathComponents'])) {
+            $this->pathComponents = $urlComponents['pathComponents'];
+        }
+        if (isset($urlComponents['queryString'])) {
+            $this->queryString = $urlComponents['queryString'];
+        }
 
     }
 

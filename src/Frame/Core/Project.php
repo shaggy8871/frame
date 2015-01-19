@@ -16,7 +16,7 @@ class Project
     {
 
         $this->ns = $ns;
-        $this->path = ($path ? realpath($path) . '/' : '') . $ns;
+        $this->path = ($path ? realpath($path) . '/' : '') . str_replace('\\', '/', $ns);
 
         // Do we have a configuration class?
         $configClass = $ns . '\\Config';

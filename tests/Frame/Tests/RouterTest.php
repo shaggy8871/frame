@@ -17,7 +17,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     public function __construct()
     {
 
-        $this->router = new Router(new Project('Frame\\Tests', '', true));
+        $this->router = new Router(new Project('Frame\\Tests', 'tests', true));
 
     }
 

@@ -19,6 +19,14 @@ class Index extends Controller
 
     }
 
+    public function routeJsonpResponse(Get $request, Jsonp $response)
+    {
+
+        $response->setCallback('jsonp');
+        return array('jsonp' => true);
+
+    }
+
     public function routeTwigResponse(Get $request, Twig $response)
     {
 

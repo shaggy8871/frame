@@ -63,6 +63,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testWebRouteJsonpResponse()
+    {
+
+        $this->expectOutputString(sprintf('%s(%s)', 'jsonp', json_encode(['jsonp' => true])));
+
+        $this->router->parseUrl($this->generateUrl('/jsonpResponse'));
+
+    }
+
     public function testWebRouteTwigResponse()
     {
 

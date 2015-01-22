@@ -318,7 +318,7 @@ class Router
             $response = $reflection->invokeArgs($inject);
         }
 
-        if ($response) {
+        if (($response !== false) && ($response !== null)) {
             // If object is a Response class, simply call the render method (assume it knows what to do)
             // Otherwise call the render method on the defined/default response class
             if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {

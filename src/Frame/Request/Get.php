@@ -13,9 +13,7 @@ class Get extends Request
     public function __construct()
     {
 
-        foreach ($_GET as $key => $value) {
-            $this->get[$key] = $value;
-        }
+        $this->get = $_GET;
 
         parent::__construct();
 
@@ -32,7 +30,7 @@ class Get extends Request
     }
 
     /*
-     * Magic getter method maps requests to the private $get property
+     * Magic getter method maps requests to the protected $get property
      */
     public function __get($property)
     {

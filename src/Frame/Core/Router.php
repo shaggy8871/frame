@@ -60,11 +60,11 @@ class Router
 
         $projectControllers = $this->project->ns . '\\Controllers\\';
 
-        // Alias in the Url class
+        // Alias in the core classes
+        // Note that doing so will prevents URLs from beginning with these verbs
+        // @todo: fix this!
         $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Url');
         $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Controllers\\Url');
-
-        // Alias in the remaining core classes
         $this->createAlias('Frame\\Core\\Project', $this->project->ns . '\\Controllers\\Project');
         $this->createAlias('Frame\\Core\\Controller', $this->project->ns . '\\Controllers\\Controller');
 

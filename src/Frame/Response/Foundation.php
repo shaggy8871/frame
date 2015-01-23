@@ -215,7 +215,7 @@ abstract class Foundation
         }
 
         // Split into components (should be moved into helper class)
-    	$annotations = array();
+        $annotations = array();
         if (preg_match_all('#@(.*?)\n#s', $doc, $components)) {
         	foreach($components[1] as $annotation) {
         	   list($key, $val) = preg_split('/[ :]+/', $annotation, 2);
@@ -224,7 +224,7 @@ abstract class Foundation
         }
 
         if (!isset($annotations['canonical'])) {
-            throw new ReverseRouteLookupException("The method " . $reflection->getClass . "::" . $reflection->getMethod . " has no @canonical DocBlock configured.");
+            throw new ReverseRouteLookupException("The method " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName() . " has no @canonical DocBlock configured.");
         }
 
         $canonical = $annotations['canonical'];

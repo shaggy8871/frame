@@ -2,6 +2,8 @@
 
 namespace Frame\Tests\Controllers;
 
+use Frame\Core\Controller;
+
 class Products extends Controller
 {
 

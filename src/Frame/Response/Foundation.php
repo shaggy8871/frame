@@ -156,7 +156,11 @@ abstract class Foundation
             throw new ResponseConfigException("Flash message requires sessions to be enabled.");
         }
 
-        $flash = json_decode($_SESSION['FRAME.flash']);
+        if (isset($_SESSION['FRAME.flash'])) {
+            $flash = json_decode($_SESSION['FRAME.flash']);
+        } else {
+            $flash = [];
+        }
 
         if (is_array($flash)) {
             $flash[$key] = $message;

@@ -7,3 +7,5 @@ date_default_timezone_set('UTC');
 
 $loader = require dirname(__DIR__) . '/vendor/autoload.php';
 $loader->add('Frame\\Tests\\', __DIR__);
+
+session_start();

@@ -60,14 +60,6 @@ class Router
 
         $projectControllers = $this->project->ns . '\\Controllers\\';
 
-        // Alias in the core classes
-        // Note that doing so will prevents URLs from beginning with these verbs
-        // @todo: fix this!
-        $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Url');
-        $this->createAlias('Frame\\Core\\Url', $this->project->ns . '\\Controllers\\Url');
-        $this->createAlias('Frame\\Core\\Project', $this->project->ns . '\\Controllers\\Project');
-        $this->createAlias('Frame\\Core\\Controller', $this->project->ns . '\\Controllers\\Controller');
-
         // Attempt 1: Look for Routes class in project and call routeResolver method
         $method = self::ROUTE_RESOLVER;
         $controller = $this->project->ns . '\\Routes';

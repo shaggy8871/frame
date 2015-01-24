@@ -117,6 +117,24 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testUrlFor()
+    {
+
+        $this->expectOutputString('/urlDestination/val');
+
+        $this->router->parseUrl($this->generateUrl('/urlFor'));
+
+    }
+
+    public function testFlash()
+    {
+
+        $this->expectOutputString(json_encode(['with' => 'flash']));
+
+        $this->router->parseUrl($this->generateUrl('/flash'));
+
+    }
+
     /*
      * Construct a Url object using the supplied requestUri
      */

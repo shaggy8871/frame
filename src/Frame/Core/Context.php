@@ -14,7 +14,7 @@ class Context
     protected $url;
     protected $caller;
 
-    public function __construct(Project $project, Url $url, Caller $caller)
+    public function __construct(Project $project = null, Url $url = null, Caller $caller = null)
     {
 
         $this->project = $project;

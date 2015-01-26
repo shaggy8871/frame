@@ -21,4 +21,14 @@ class Products extends Controller
 
     }
 
+    /**
+     * @canonical /products/urlDestination/:var
+     */
+    public function routeUrlDestination()
+    {
+
+        // Used only for routeUrlFor tests
+
+    }
+
 }

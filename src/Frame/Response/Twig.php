@@ -43,6 +43,10 @@ class Twig extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
+        if (!$this->viewFilename) {
+            throw new ResponseConfigException("Twig Response class cannot determine view filename. Please set using \$response->setViewFilename()");
+        }
+
         // Instantiate the Twig library only once, keep it global
         if (!isset($this->project->config->twig)) {
 
@@ -58,16 +62,17 @@ class Twig extends Foundation implements ResponseInterface
             }
 
             // Initialize Twig
-            $this->project->config->twig = new \Twig_Environment(new \Twig_Loader_Filesystem($this->viewDir), array(
+            $this->project->config->twig = new \Twig_Environment(new \Twig_Loader_Filesystem($this->viewDir), [
                 'cache' => $this->viewDir . '/cache',
                 'debug' => $this->debug
-            ));
+            ]);
 
         }
 
-        if (!$this->viewFilename) {
-            throw new ResponseConfigException("Twig Response class cannot determine view filename. Please set using \$response->setViewFilename()");
-        }
+        // Ensure Twig has support for custom functions
+        $this->project->config->twig->addFunction(
+            new \Twig_SimpleFunction('urlFor', [$this, 'urlFor'])
+        );
 
         $params = ($params ?: $this->viewParams);
 
@@ -80,7 +85,7 @@ class Twig extends Foundation implements ResponseInterface
         $twig = $this->project->config->twig;
         $view = $this->viewFilename . (strpos($this->viewFilename, '.') === false ? $this->defaultExtension : '');
 
-        echo $twig->render($view, (is_array($params) ? $params : array()));
+        echo $twig->render($view, (is_array($params) ? $params : []));
 
     }
 

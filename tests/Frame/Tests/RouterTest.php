@@ -121,8 +121,32 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     {
 
         $this->expectOutputString('/urlDestination/val');
-
         $this->router->parseUrl($this->generateUrl('/urlFor'));
+
+    }
+
+    public function testUrlForFallback1()
+    {
+
+        $this->expectOutputString('/urlDestination/val');
+        $this->router->parseUrl($this->generateUrl('/urlForFallback1'));
+
+    }
+
+    public function testUrlForFallback2()
+    {
+
+        $this->expectOutputString('/products/urlDestination/val');
+        $this->router->parseUrl($this->generateUrl('/urlForFallback2'));
+
+    }
+
+    public function testUrlForWithTwig()
+    {
+
+        $this->expectOutputRegex("/RouteTwigResponse: \/urlDestination\/val: \/products\/urlDestination\/val/");
+
+        $this->router->parseUrl($this->generateUrl('/twigUrlFor'));
 
     }
 

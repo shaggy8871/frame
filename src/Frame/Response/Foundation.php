@@ -10,6 +10,7 @@ abstract class Foundation
 {
 
     protected $project;
+    protected $caller;
     protected $viewDir = '';
     protected $viewFilename = '';
     protected $viewParams = [];
@@ -44,6 +45,9 @@ abstract class Foundation
         if (isset($defaults['project'])) {
             $this->setProject($defaults['project']);
         }
+        if (isset($defaults['caller'])) {
+            $this->setCaller($defaults['caller']);
+        }
         if (isset($defaults['viewDir'])) {
             $this->setViewDir($defaults['viewDir']);
         }
@@ -66,6 +70,26 @@ abstract class Foundation
         $this->project = $project;
 
         return $this; // allow for chaining
+
+    }
+
+    /*
+     * The caller tells the response class where it was called from
+     * No type hint required for now...
+     */
+    public function setCaller(array $caller)
+    {
+
+        if ((!isset($caller['controller'])) || (!isset($caller['methodName']))) {
+            throw new ResponseConfigException("Caller array is expecting controller and methodName parameters");
+        }
+
+        $this->caller = (object) [
+            'controller' => $caller['controller'],
+            'methodName' => $caller['methodName']
+        ];
+
+        return $this;
 
     }
 
@@ -200,14 +224,25 @@ abstract class Foundation
      * The $method parameter should be of type callable, which is a string of format
      * class::methodName or an array of [class, methodName]
      */
-    public function urlFor(callable $mixed, array $params = null)
+    public function urlFor($callback, array $params = null)
     {
 
         try {
-            if (is_array($mixed)) {
-                $reflection = new \ReflectionMethod($mixed[0], $mixed[1]);
-            } else {
-                $reflection = new \ReflectionMethod($mixed);
+            // Standard array-based callable [$object, $methodName]
+            if (is_array($callback)) {
+                $reflection = new \ReflectionMethod($callback[0], $callback[1]);
+            } else
+            // Static callable - class::methodName
+            if (is_callable($callback)) {
+                $reflection = new \ReflectionMethod($callback);
+            } else
+            // Fallback 1 - try to make it callable by adding a namespace
+            if (strpos($callback, '::') !== false) {
+                $reflection = new \ReflectionMethod($this->project->ns . '\\Controllers\\' . $callback);
+            } else
+            // Fallback 2 - if partial string, assume it's a method name in the current controller class
+            if ($this->caller != null) {
+                $reflection = new \ReflectionMethod($this->caller->controller, $callback);
             }
         } catch (\ReflectionException $e) {
             throw new ReverseRouteLookupException("Parameter passed to the urlFor method is not callable");
@@ -218,7 +253,7 @@ abstract class Foundation
             throw new ReverseRouteLookupException("The urlFor method expects a DocBlock with @canonical parameter above " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName());
         }
 
-        // Split into components (should be moved into helper class)
+        // Split into components (should be moved into helper/util class)
         $annotations = array();
         if (preg_match_all('#@(.*?)\n#s', $doc, $components)) {
         	foreach($components[1] as $annotation) {

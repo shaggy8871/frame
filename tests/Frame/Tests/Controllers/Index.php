@@ -45,13 +45,40 @@ class Index extends Controller
 
     }
 
+    public function routeUrlForFallback1(Get $request, Html $response)
+    {
+
+        // Method name only, should assume current class
+        echo $response->urlFor('routeUrlDestination', [
+            'var' => 'val'
+        ]);
+
+    }
+
+    public function routeUrlForFallback2(Get $request, Html $response)
+    {
+
+        // Partial class name, should automatically namespace to current project
+        echo $response->urlFor('Products::routeUrlDestination', [
+            'var' => 'val'
+        ]);
+
+    }
+
+    public function routeTwigUrlFor(Get $request, Twig $response)
+    {
+
+        return array();
+
+    }
+
     /**
      * @canonical /urlDestination/:var
      */
     public function routeUrlDestination()
     {
 
-        // Used only for routeUrlFor test
+        // Used only for routeUrlFor tests
 
     }
 

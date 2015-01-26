@@ -225,9 +225,7 @@ class Router
 
     /*
      * Calls the specified function or closure and injects parameters
-     * @param $class controller class object
-     * @param $method string method name
-     * @todo Instantiate parameters only once per global session
+     * @param $function the closure
      */
     private function invokeFunction($function)
     {
@@ -280,26 +278,27 @@ class Router
                     throw new ClassNotFoundException($alias, ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
                 }
             }
-            // Special case for a Url and Project type hints, send in the one we already have
-            if ($paramClass->name == 'Frame\\Core\\Url') {
-                $inject[] = $this->url;
-            } else
-            if ($paramClass->name == 'Frame\\Core\\Project') {
-                $inject[] = $this->project;
-            } else
             // If we get this far, we should have the class aliased and auto-loaded
             if ($paramClass instanceof \ReflectionClass) {
-                $paramPos = $param->getPosition();
-                if ($paramPos == self::PARAM_REQUEST) {
-                    $paramInstance = $this->instantiateRequestClass($param, $paramClass);
+                // Special case for a Url and Project type hints, send in the one we already have
+                if ($paramClass->name == 'Frame\\Core\\Url') {
+                    $inject[] = $this->url;
+                } else
+                if ($paramClass->name == 'Frame\\Core\\Project') {
+                    $inject[] = $this->project;
                 } else {
-                    $paramInstance = new $paramClass->name($this->project);
+                    $paramPos = $param->getPosition();
+                    if ($paramPos == self::PARAM_REQUEST) {
+                        $paramInstance = $this->instantiateRequestClass($param, $paramClass);
+                    } else {
+                        $paramInstance = new $paramClass->name($this->project);
+                    }
+                    // If this is a response class (parameter 2), set the default view filename
+                    if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
+                        $this->setResponseDefaults($paramInstance, $reflection, $class);
+                    }
+                    $inject[] = $paramInstance;
                 }
-                // If this is a response class (parameter 2), set the default view filename
-                if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
-                    $this->setResponseDefaults($paramInstance, $reflection, $class);
-                }
-                $inject[] = $paramInstance;
             }
         }
 
@@ -394,18 +393,23 @@ class Router
         if (!is_callable(array($responseClass, 'setDefaults'))) {
             return false;
         }
-        // Not available if it's a closure
+        // Not available if it's a closure since we have no context
         if ($reflection->isClosure()) {
             return false;
         }
 
-        // Try to auto-detect view file using controller
+        // Try to auto-detect details using controller
         if ($controllerClass) {
             // Reflect on the controllerClass
             $controllerClassReflection = new \ReflectionClass($controllerClass);
             $controllerPath = pathinfo($controllerClassReflection->getFileName());
             // Inject view filename
             $responseClass->setViewFilename($controllerPath['filename'] . '/' . strtolower(str_replace('route', '', $reflection->getName())));
+            // Inject calling controller and method
+            $responseClass->setCaller([
+                'controller' => $controllerClass,
+                'methodName' => $reflection->getName()
+            ]);
         }
 
     }

@@ -10,13 +10,13 @@ class Get extends Request
     /*
      * GET values are simply stored as object properties - unsanitized!
      */
-    public function __construct(\Frame\Core\Router $router)
+    public function __construct(\Frame\Core\Context $context)
     {
 
         $this->type = 'Get';
         $this->get = $_GET;
 
-        parent::__construct($router);
+        parent::__construct($context);
 
     }
 

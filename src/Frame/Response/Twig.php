@@ -14,7 +14,7 @@
 
 namespace Frame\Response;
 
-use Frame\Core\Router;
+use Frame\Core\Context;
 use Frame\Response\Exception\ResponseConfigException;
 
 class Twig extends Foundation implements ResponseInterface
@@ -24,7 +24,7 @@ class Twig extends Foundation implements ResponseInterface
     protected $defaultExtension = '.html.twig';
     protected $debug = true;
 
-    public function __construct(Router $router)
+    public function __construct(Context $context)
     {
 
         // Check that Twig is loaded
@@ -32,11 +32,11 @@ class Twig extends Foundation implements ResponseInterface
             throw new ResponseConfigException("Twig is not installed, Response class cannot be used.");
         }
 
-        if ($router->getProject()->debugMode !== null) {
-            $this->debug = $router->getProject()->debugMode;
+        if ($context->getProject()->debugMode !== null) {
+            $this->debug = $context->getProject()->debugMode;
         }
 
-        parent::__construct($router);
+        parent::__construct($context);
 
     }
 
@@ -48,7 +48,7 @@ class Twig extends Foundation implements ResponseInterface
         }
 
         // Instantiate the Twig library only once, keep it global
-        if (!isset($this->router->getProject()->config->twig)) {
+        if (!isset($this->context->getProject()->config->twig)) {
 
             // Make sure we can determine which template to render
             if (!$this->viewDir) {
@@ -62,7 +62,7 @@ class Twig extends Foundation implements ResponseInterface
             }
 
             // Initialize Twig
-            $this->router->getProject()->config->twig = new \Twig_Environment(new \Twig_Loader_Filesystem($this->viewDir), [
+            $this->context->getProject()->config->twig = new \Twig_Environment(new \Twig_Loader_Filesystem($this->viewDir), [
                 'cache' => $this->viewDir . '/cache',
                 'debug' => $this->debug
             ]);
@@ -70,7 +70,7 @@ class Twig extends Foundation implements ResponseInterface
         }
 
         // Ensure Twig has support for custom functions
-        $this->router->getProject()->config->twig->addFunction(
+        $this->context->getProject()->config->twig->addFunction(
             new \Twig_SimpleFunction('urlFor', [$this, 'urlFor'])
         );
 
@@ -82,7 +82,7 @@ class Twig extends Foundation implements ResponseInterface
         }
 
         // Render a view file with a .twig extension
-        $twig = $this->router->getProject()->config->twig;
+        $twig = $this->context->getProject()->config->twig;
         $view = $this->viewFilename . (strpos($this->viewFilename, '.') === false ? $this->defaultExtension : '');
 
         echo $twig->render($view, (is_array($params) ? $params : []));

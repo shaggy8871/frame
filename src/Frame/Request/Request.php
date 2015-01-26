@@ -5,13 +5,13 @@ namespace Frame\Request;
 class Request
 {
 
-    protected $router;
+    protected $context;
     protected $type;
 
-    public function __construct(\Frame\Core\Router $router)
+    public function __construct(\Frame\Core\Context $context)
     {
 
-        $this->router = $router;
+        $this->context = $context;
 
         // Attempt to guess the type
         if (isset($_SERVER['REQUEST_METHOD'])) {

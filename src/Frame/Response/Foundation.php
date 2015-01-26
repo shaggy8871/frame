@@ -2,7 +2,7 @@
 
 namespace Frame\Response;
 
-use Frame\Core\Router;
+use Frame\Core\Context;
 use Frame\Core\Utils\Annotations;
 use Frame\Core\Utils\Url;
 use Frame\Response\Exception\ReverseRouteLookupException;
@@ -11,7 +11,7 @@ use Frame\Response\Exception\ResponseConfigException;
 abstract class Foundation
 {
 
-    protected $router;
+    protected $context;
     protected $viewDir = '';
     protected $viewFilename = '';
     protected $viewParams = [];
@@ -19,14 +19,14 @@ abstract class Foundation
     protected $contentType = 'text/html';
     protected $flash;
 
-    public function __construct(Router $router)
+    public function __construct(Context $context)
     {
 
-        $this->router = $router;
+        $this->context = $context;
 
         // Attempt to auto-detect the view directory path
-        if (isset($this->router->getProject()->path)) {
-            $this->setViewDir($this->router->getProject()->path . '/Views');
+        if (isset($this->context->getProject()->path)) {
+            $this->setViewDir($this->context->getProject()->path . '/Views');
         }
 
         // Remove flash from session if available
@@ -201,11 +201,11 @@ abstract class Foundation
             } else
             // Fallback 1 - try to make it callable by adding a namespace
             if (strpos($callback, '::') !== false) {
-                $reflection = new \ReflectionMethod($this->router->getProject()->ns . '\\Controllers\\' . $callback);
+                $reflection = new \ReflectionMethod($this->context->getProject()->ns . '\\Controllers\\' . $callback);
             } else
             // Fallback 2 - if partial string, assume it's a method name in the current controller class
-            if ($this->router->getCaller()->controller) {
-                $reflection = new \ReflectionMethod($this->router->getCaller()->controller, $callback);
+            if ($this->context->getCaller()->controller) {
+                $reflection = new \ReflectionMethod($this->context->getCaller()->controller, $callback);
             } else {
                 throw new ReverseRouteLookupException("Parameter passed to the urlFor method is not callable");
             }

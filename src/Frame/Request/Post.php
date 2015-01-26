@@ -10,13 +10,13 @@ class Post extends Request
     /*
      * POST values are simply stored as object properties - unsanitized!
      */
-    public function __construct(\Frame\Core\Router $router)
+    public function __construct(\Frame\Core\Context $context)
     {
 
         $this->type = 'Post';
         $this->post = $_POST;
 
-        parent::__construct($router);
+        parent::__construct($context);
 
     }
 

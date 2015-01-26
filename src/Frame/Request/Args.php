@@ -14,7 +14,7 @@ class Args extends Request
     /*
      * Console arguments are simply stored as object properties - unsanitized!
      */
-    public function __construct(\Frame\Core\Router $router)
+    public function __construct(\Frame\Core\Context $context)
     {
 
         foreach ($GLOBALS['argv'] as $key => $value) {
@@ -23,7 +23,7 @@ class Args extends Request
             }
         }
 
-        parent::_construct($router);
+        parent::_construct($context);
 
     }
 

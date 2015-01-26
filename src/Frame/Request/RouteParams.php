@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-use Frame\Core\Router;
+use Frame\Core\Context;
 use Frame\Core\Utils\Url;
 use Frame\Request\Request;
 
@@ -14,15 +14,15 @@ class RouteParams extends Request
     /*
      * Route param values are simply stored as object properties - unsanitized!
      */
-    public function __construct(Router $router)
+    public function __construct(Context $context)
     {
 
         $this->type = 'RouteParams';
 
         // Default approach to route param parsing
-        $this->routeParams = explode('/', $router->getUrl()->requestUri);
+        $this->routeParams = explode('/', $context->getUrl()->requestUri);
 
-        parent::__construct($router);
+        parent::__construct($context);
 
     }
 
@@ -32,10 +32,10 @@ class RouteParams extends Request
     public static function createFromRequest(Request $request)
     {
 
-        $self = new static($request->router);
+        $self = new static($request->context);
 
-        if (isset($request->router->getCaller()->annotations['canonical'])) {
-            $self->setRouteParams(Url::extract($request->router->getCaller()->annotations['canonical'], $request->router->getUrl()->requestUri));
+        if (isset($request->context->getCaller()->annotations['canonical'])) {
+            $self->setRouteParams(Url::extract($request->context->getCaller()->annotations['canonical'], $request->context->getUrl()->requestUri));
         } else {
             throw new Exception\MissingDocBlockException('RouteParams Request class requires @canonical DocBlock on calling method.');
         }

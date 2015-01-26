@@ -318,7 +318,9 @@ class Router
                     if ($paramPos == self::PARAM_REQUEST) {
                         $paramInstance = $this->instantiateRequestClass($param, $paramClass);
                     } else {
-                        $paramInstance = new $paramClass->name($this);
+                        $paramInstance = new $paramClass->name(
+                            new Context($this->project, $this->url, $this->caller)
+                        );
                     }
                     // If this is a response class (parameter 2), set the default view filename
                     if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
@@ -345,7 +347,9 @@ class Router
                 if (array_key_exists(self::PARAM_RESPONSE, $inject)) {
                     $responseClass = $inject[self::PARAM_RESPONSE];
                 } else {
-                    $responseClass = new \Frame\Response\Html($this);
+                    $responseClass = new \Frame\Response\Html(
+                        new Context($this->project, $this->url, $this->caller)
+                    );
                     if (is_callable(array($responseClass, 'setDefaults'))) {
                         $this->setResponseDefaults($responseClass, $reflection, $class);
                     }
@@ -372,14 +376,18 @@ class Router
             // Method exists, but is it static?
             if (!$paramFactory->isStatic()) {
                 // Fall back
-                return new $paramClass->name($this);
+                return new $paramClass->name(
+                    new Context($this->project, $this->url, $this->caller)
+                );
             }
 
             // Create a local alias for the Request\Request class
             // @deprecated
             $this->createAlias('Frame\\Request\\Request', $paramClass->getNamespaceName() . '\\Request');
 
-            $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request($this));
+            $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request(
+                new Context($this->project, $this->url, $this->caller)
+            ));
 
             // If we don't get an object back, set it to null for safety
             if (!is_object($paramInstance)) {
@@ -396,7 +404,9 @@ class Router
 
         } catch (\ReflectionException $e) {
             // Didn't work so continue as normal
-            return new $paramClass->name($this);
+            return new $paramClass->name(
+                new Context($this->project, $this->url, $this->caller)
+            );
         }
 
     }

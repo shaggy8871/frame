@@ -22,6 +22,7 @@ class Router
 
     private $project;
     private $url;
+    private $caller;
     // Order of namespace aliases for request/response parameters
     private $paramAliases = [
         'Frame\\Request',
@@ -219,7 +220,20 @@ class Router
             return $this->routeNotFound();
         }
 
-        $this->invokeCallable(new \ReflectionMethod($class, $method), $class);
+        $reflection = new \ReflectionMethod($class, $method);
+
+        // Look up docblock annotations if available
+        if ($reflection->getDocComment()) {
+            $annotations = Utils\Annotations::parseDocBlock($reflection->getDocComment());
+        } else {
+            $annotations = null;
+        }
+
+        // Save caller information
+        $this->caller = new Caller($class, $method, $annotations);
+
+        // Call the method
+        $this->invokeCallable($reflection, $class);
 
     }
 
@@ -234,7 +248,20 @@ class Router
             return $this->routeNotFound();
         }
 
-        $this->invokeCallable(new \ReflectionFunction($function));
+        $reflection = new \ReflectionFunction($function);
+
+        // Look up docblock annotations if available
+        if ($reflection->getDocComment()) {
+            $annotations = Utils\Annotations::parseDocBlock($reflection->getDocComment());
+        } else {
+            $annotations = null;
+        }
+
+        // Save caller information
+        $this->caller = new Caller(null, $function, $annotations);
+
+        // Call the function
+        $this->invokeCallable($reflection);
 
     }
 
@@ -291,7 +318,7 @@ class Router
                     if ($paramPos == self::PARAM_REQUEST) {
                         $paramInstance = $this->instantiateRequestClass($param, $paramClass);
                     } else {
-                        $paramInstance = new $paramClass->name($this->project);
+                        $paramInstance = new $paramClass->name($this);
                     }
                     // If this is a response class (parameter 2), set the default view filename
                     if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
@@ -318,7 +345,7 @@ class Router
                 if (array_key_exists(self::PARAM_RESPONSE, $inject)) {
                     $responseClass = $inject[self::PARAM_RESPONSE];
                 } else {
-                    $responseClass = new \Frame\Response\Html($this->project);
+                    $responseClass = new \Frame\Response\Html($this);
                     if (is_callable(array($responseClass, 'setDefaults'))) {
                         $this->setResponseDefaults($responseClass, $reflection, $class);
                     }
@@ -345,13 +372,14 @@ class Router
             // Method exists, but is it static?
             if (!$paramFactory->isStatic()) {
                 // Fall back
-                return new $paramClass->name($this->project);
+                return new $paramClass->name($this);
             }
 
             // Create a local alias for the Request\Request class
+            // @deprecated
             $this->createAlias('Frame\\Request\\Request', $paramClass->getNamespaceName() . '\\Request');
 
-            $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request($this->project));
+            $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request($this));
 
             // If we don't get an object back, set it to null for safety
             if (!is_object($paramInstance)) {
@@ -368,7 +396,7 @@ class Router
 
         } catch (\ReflectionException $e) {
             // Didn't work so continue as normal
-            return new $paramClass->name($this->project);
+            return new $paramClass->name($this);
         }
 
     }
@@ -405,11 +433,6 @@ class Router
             $controllerPath = pathinfo($controllerClassReflection->getFileName());
             // Inject view filename
             $responseClass->setViewFilename($controllerPath['filename'] . '/' . strtolower(str_replace('route', '', $reflection->getName())));
-            // Inject calling controller and method
-            $responseClass->setCaller([
-                'controller' => $controllerClass,
-                'methodName' => $reflection->getName()
-            ]);
         }
 
     }
@@ -427,12 +450,32 @@ class Router
     }
 
     /*
+     * Return the project
+     */
+    public function getProject()
+    {
+
+        return $this->project;
+
+    }
+
+    /*
      * Return the parsed url class that we're using
      */
     public function getUrl()
     {
 
         return $this->url;
+
+    }
+
+    /*
+     * Return the caller information
+     */
+    public function getCaller()
+    {
+
+        return $this->caller;
 
     }
 

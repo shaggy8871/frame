@@ -3,6 +3,12 @@
 namespace Frame\Tests\Controllers;
 
 use Frame\Core\Controller;
+use Frame\Request\Get;
+use Frame\Request\RouteParams;
+use Frame\Response\Html;
+use Frame\Response\Json;
+use Frame\Response\Jsonp;
+use Frame\Response\Twig;
 
 class Index extends Controller
 {
@@ -36,6 +42,16 @@ class Index extends Controller
 
     }
 
+    /**
+     * @canonical /urlParamsRequest/:id(/:slug)
+     */
+    public function routeUrlParamsRequest(RouteParams $request, Html $response)
+    {
+
+        echo json_encode(['id' => $request->id, 'slug' => $request->slug]);
+
+    }
+
     public function routeUrlFor(Get $request, Html $response)
     {
 
@@ -49,8 +65,9 @@ class Index extends Controller
     {
 
         // Method name only, should assume current class
-        echo $response->urlFor('routeUrlDestination', [
-            'var' => 'val'
+        echo $response->urlFor('routeUrlParamsRequest', [
+            'id' => '123',
+            'slug' => 'slugger'
         ]);
 
     }

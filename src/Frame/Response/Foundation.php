@@ -2,15 +2,16 @@
 
 namespace Frame\Response;
 
-use Frame\Core\Project;
+use Frame\Core\Router;
+use Frame\Core\Utils\Annotations;
+use Frame\Core\Utils\Url;
 use Frame\Response\Exception\ReverseRouteLookupException;
 use Frame\Response\Exception\ResponseConfigException;
 
 abstract class Foundation
 {
 
-    protected $project;
-    protected $caller;
+    protected $router;
     protected $viewDir = '';
     protected $viewFilename = '';
     protected $viewParams = [];
@@ -18,14 +19,14 @@ abstract class Foundation
     protected $contentType = 'text/html';
     protected $flash;
 
-    public function __construct(Project $project = null)
+    public function __construct(Router $router)
     {
 
-        $this->project = ($project ? $project : new Project('', '', new \stdClass()));
+        $this->router = $router;
 
         // Attempt to auto-detect the view directory path
-        if ($this->project->path) {
-            $this->setViewDir($this->project->path . '/Views');
+        if (isset($this->router->getProject()->path)) {
+            $this->setViewDir($this->router->getProject()->path . '/Views');
         }
 
         // Remove flash from session if available
@@ -42,12 +43,6 @@ abstract class Foundation
     public function setDefaults(array $defaults)
     {
 
-        if (isset($defaults['project'])) {
-            $this->setProject($defaults['project']);
-        }
-        if (isset($defaults['caller'])) {
-            $this->setCaller($defaults['caller']);
-        }
         if (isset($defaults['viewDir'])) {
             $this->setViewDir($defaults['viewDir']);
         }
@@ -58,38 +53,6 @@ abstract class Foundation
         if (is_array($defaults['view'])) {
             $this->setView($defaults['view']);
         }
-
-    }
-
-    /*
-    * Set the project
-    */
-    public function setProject($project)
-    {
-
-        $this->project = $project;
-
-        return $this; // allow for chaining
-
-    }
-
-    /*
-     * The caller tells the response class where it was called from
-     * No type hint required for now...
-     */
-    public function setCaller(array $caller)
-    {
-
-        if ((!isset($caller['controller'])) || (!isset($caller['methodName']))) {
-            throw new ResponseConfigException("Caller array is expecting controller and methodName parameters");
-        }
-
-        $this->caller = (object) [
-            'controller' => $caller['controller'],
-            'methodName' => $caller['methodName']
-        ];
-
-        return $this;
 
     }
 
@@ -238,11 +201,13 @@ abstract class Foundation
             } else
             // Fallback 1 - try to make it callable by adding a namespace
             if (strpos($callback, '::') !== false) {
-                $reflection = new \ReflectionMethod($this->project->ns . '\\Controllers\\' . $callback);
+                $reflection = new \ReflectionMethod($this->router->getProject()->ns . '\\Controllers\\' . $callback);
             } else
             // Fallback 2 - if partial string, assume it's a method name in the current controller class
-            if ($this->caller != null) {
-                $reflection = new \ReflectionMethod($this->caller->controller, $callback);
+            if ($this->router->getCaller()->controller) {
+                $reflection = new \ReflectionMethod($this->router->getCaller()->controller, $callback);
+            } else {
+                throw new ReverseRouteLookupException("Parameter passed to the urlFor method is not callable");
             }
         } catch (\ReflectionException $e) {
             throw new ReverseRouteLookupException("Parameter passed to the urlFor method is not callable");
@@ -253,14 +218,7 @@ abstract class Foundation
             throw new ReverseRouteLookupException("The urlFor method expects a DocBlock with @canonical parameter above " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName());
         }
 
-        // Split into components (should be moved into helper/util class)
-        $annotations = array();
-        if (preg_match_all('#@(.*?)\n#s', $doc, $components)) {
-        	foreach($components[1] as $annotation) {
-        	   list($key, $val) = preg_split('/[ :]+/', $annotation, 2);
-        	   $annotations[$key] = $val;
-        	}
-        }
+        $annotations = Annotations::parseDocBlock($doc);
 
         if (!isset($annotations['canonical'])) {
             throw new ReverseRouteLookupException("The method " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName() . " has no @canonical DocBlock configured.");
@@ -270,12 +228,20 @@ abstract class Foundation
 
         // Replace in parameters
         if ($params) {
-            foreach($params as $name => $param) {
-                $canonical = str_replace(':' . $name, $param, $canonical);
-            }
+            $canonical = Url::replaceIntoTemplate($canonical, $params);
         }
 
         return $canonical;
+
+    }
+
+    /*
+     * Handy method that combines redirect and urlFor
+     */
+    public function redirectToUrl($callback, array $params = null)
+    {
+
+        $this->redirect($this->urlFor($callback, $params));
 
     }
 

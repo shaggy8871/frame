@@ -13,7 +13,7 @@ class Response extends Foundation implements ResponseInterface
     public function setType($type)
     {
 
-        $responseClass = __NAMESPACE__ . '\\' . ucfirst($type);
+        $responseClass = __NAMESPACE__ . '\\' . $type;
         if (class_exists($responseClass)) {
             $this->responseClass = new $responseClass;
         } else {
@@ -29,7 +29,7 @@ class Response extends Foundation implements ResponseInterface
     {
 
         if (!$this->responseClass) {
-            throw new \Exception('No Response type defined. Use Response \$out->setType to indicate.');
+            throw new \Exception('No Response type defined. Use Response \$response->setType() to indicate.');
         }
 
         $this->responseClass->render($params);

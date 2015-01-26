@@ -5,13 +5,15 @@ namespace Frame\Request;
 class Request
 {
 
+    protected $router;
     protected $type;
 
-    public function __construct()
+    public function __construct(\Frame\Core\Router $router)
     {
 
-        // Attempt to guess the type
+        $this->router = $router;
 
+        // Attempt to guess the type
         if (isset($_SERVER['REQUEST_METHOD'])) {
             $requestMethod = $_SERVER['REQUEST_METHOD'];
             switch ($requestMethod) {
@@ -45,8 +47,8 @@ class Request
     }
 
     /*
-    * Returns a POST request object
-    */
+     * Returns a POST request object
+     */
     public function post()
     {
 
@@ -55,12 +57,32 @@ class Request
     }
 
     /*
-    * Returns an Args request object
-    */
+     * Returns an Args request object
+     */
     public function args()
     {
 
         return new Args();
+
+    }
+
+    /*
+     * Returns route parameters
+     */
+    public function routeParams()
+    {
+
+        return RouteParams::createFromRequest($this);
+
+    }
+
+    /*
+     * Returns the type of request
+     */
+    public function getType()
+    {
+
+        return $this->type;
 
     }
 

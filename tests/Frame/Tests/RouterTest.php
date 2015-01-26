@@ -54,7 +54,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    public function testWebRouteJsonResponse()
+    public function testIndexRouteJsonResponse()
     {
 
         $this->expectOutputString(json_encode(['json' => true]));
@@ -63,7 +63,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    public function testWebRouteJsonpResponse()
+    public function testIndexRouteJsonpResponse()
     {
 
         $this->expectOutputString(sprintf('%s(%s)', 'jsonp', json_encode(['jsonp' => true])));
@@ -72,7 +72,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    public function testWebRouteTwigResponse()
+    public function testIndexRouteTwigResponse()
     {
 
         $this->expectOutputRegex("/RouteTwigResponseOkay/");
@@ -80,6 +80,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->router->parseUrl($this->generateUrl('/twigResponse'));
 
     }
+
+    public function testIndexRouteUrlParamsRequest()
+    {
+
+        $this->expectOutputString(json_encode(['id' => '123', 'slug' => 'sluggish']));
+
+        $this->router->parseUrl($this->generateUrl('/index/urlParamsRequest/123/sluggish'));
+
+    }
+
 
     public function testProductsRouteDefault()
     {
@@ -128,7 +138,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
     public function testUrlForFallback1()
     {
 
-        $this->expectOutputString('/urlDestination/val');
+        $this->expectOutputString('/urlParamsRequest/123/slugger');
         $this->router->parseUrl($this->generateUrl('/urlForFallback1'));
 
     }
@@ -168,7 +178,8 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $pathComponents = explode('/', substr($requestUri, 1));
 
         return new Url([
-            'pathComponents' => $pathComponents
+            'pathComponents' => $pathComponents,
+            'requestUri' => $requestUri
         ]);
 
     }

@@ -42,7 +42,7 @@ class Request
     public function get()
     {
 
-        return new Get();
+        return new Get($this->context);
 
     }
 
@@ -52,7 +52,7 @@ class Request
     public function post()
     {
 
-        return new Post();
+        return new Post($this->context);
 
     }
 
@@ -62,7 +62,7 @@ class Request
     public function args()
     {
 
-        return new Args();
+        return new Args($this->context);
 
     }
 

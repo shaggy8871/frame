@@ -53,7 +53,9 @@ class Url
         $regex = static::templateToRegex($urlTemplate, $keys);
 
         if (preg_match($regex, $requestUri, $matches) !== false) {
-            return array_combine($keys, array_slice($matches, 1));
+            return array_combine($keys,
+                array_pad(array_slice($matches, 1), count($keys), null)
+            );
         }
 
     }

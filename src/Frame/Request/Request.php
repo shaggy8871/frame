@@ -7,6 +7,7 @@ class Request
 
     protected $context;
     protected $type;
+    protected $flash;
 
     public function __construct(\Frame\Core\Context $context)
     {
@@ -32,6 +33,12 @@ class Request
             $this->type = 'Args';
         } else {
             $this->type = 'Unknown';
+        }
+
+        // Remove flash from session if available
+        if (isset($_SESSION['FRAME.flash'])) {
+            $this->flash = json_decode($_SESSION['FRAME.flash']);
+            unset($_SESSION['FRAME.flash']);
         }
 
     }
@@ -93,6 +100,16 @@ class Request
     {
 
         return $this->context;
+
+    }
+
+    /*
+     * Look up the saved Flash value if available
+     */
+    public function getFlash($key)
+    {
+
+        return (isset($this->flash->$key) ? $this->flash->$key : null);
 
     }
 

@@ -17,7 +17,6 @@ abstract class Foundation
     protected $viewParams = [];
     protected $statusCode = 200;
     protected $contentType = 'text/html';
-    protected $flash;
 
     public function __construct(Context $context)
     {
@@ -27,12 +26,6 @@ abstract class Foundation
         // Attempt to auto-detect the view directory path
         if (isset($this->context->getProject()->path)) {
             $this->setViewDir($this->context->getProject()->path . '/Views');
-        }
-
-        // Remove flash from session if available
-        if (isset($_SESSION['FRAME.flash'])) {
-            $this->flash = json_decode($_SESSION['FRAME.flash']);
-            unset($_SESSION['FRAME.flash']);
         }
 
     }
@@ -158,16 +151,6 @@ abstract class Foundation
         }
 
         $_SESSION['FRAME.flash'] = json_encode($flash);
-
-    }
-
-    /*
-     * Look up the saved Flash value if available
-     */
-    public function getFlash($key)
-    {
-
-        return (isset($this->flash->$key) ? $this->flash->$key : null);
 
     }
 

@@ -312,7 +312,10 @@ class Router
                     $inject[] = $this->url;
                 } else
                 if ($paramClass->name == 'Frame\\Core\\Project') {
-                    $inject[] = $this->project;
+                    $inject[] = $this->url;
+                } else
+                if ($paramClass->name == 'Frame\\Core\\Context') {
+                    $inject[] = new Context($this->project, $this->url, $this->caller);
                 } else {
                     $paramPos = $param->getPosition();
                     if ($paramPos == self::PARAM_REQUEST) {

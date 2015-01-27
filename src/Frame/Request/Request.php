@@ -87,6 +87,16 @@ class Request
     }
 
     /*
+     * Returns the saved context
+     */
+    public function getContext()
+    {
+
+        return $this->context;
+
+    }
+
+    /*
     * Return all public and protected values
     */
     public function __get($property)

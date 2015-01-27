@@ -224,12 +224,9 @@ abstract class Foundation
             throw new ReverseRouteLookupException("The method " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName() . " has no @canonical DocBlock configured.");
         }
 
-        $canonical = $annotations['canonical'];
-
         // Replace in parameters
-        if ($params) {
-            $canonical = Url::replaceIntoTemplate($canonical, $params);
-        }
+        $canonical = $annotations['canonical'];
+        $canonical = Url::replaceIntoTemplate($canonical, $params);
 
         return $canonical;
 

@@ -33,10 +33,6 @@ class Url
     public static function replaceIntoTemplate($urlTemplate, $params = array())
     {
 
-        if (empty($params)) {
-            return $urlTemplate; // nothing to do
-        }
-
         return
             preg_replace_callback('/([\/\(]*)(\()?:([a-z]+)([\)]*)?/',
                 function($matches) use ($params) {

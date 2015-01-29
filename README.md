@@ -1,6 +1,8 @@
 FRAME
 =====
 
+[![Build Status](https://travis-ci.org/shaggy8871/frame.svg?branch=master)](https://travis-ci.org/shaggy8871/frame)
+
 FRAME is a bare-bones PHP framework. Our goals:
 
 1. No bulky installs
@@ -14,7 +16,7 @@ In composer.json:
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/shaggy8871/FRAME"
+        "url": "https://github.com/shaggy8871/frame"
     }
 ],
 "require": {

@@ -16,7 +16,7 @@ class Annotations
         if (preg_match_all('#@(.*?)\n#s', $docComments, $components)) {
         	foreach($components[1] as $annotation) {
         	   list($key, $val) = preg_split('/[ :]+/', $annotation, 2);
-        	   $annotations[$key] = $val;
+        	   $annotations[$key] = trim($val);
         	}
         }
 

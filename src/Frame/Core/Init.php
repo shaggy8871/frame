@@ -52,26 +52,25 @@ class Init
 
         } catch (RouteNotFoundException $e) {
 
+            $context = new Context($e->getProject(), $e->getUrl());
+
             if ($this->onRouteNotFound) {
                 // Call the user defined route not found handler
                 call_user_func($this->onRouteNotFound, [
-                    'project' => $e->getProject(),
-                    'url' => $e->getUrl(),
                     'statusCode' => 404,
-                    'message' => $e->getMessage()
+                    'context' => $context,
+                    'exceptionMessage' => $e->getMessage()
                 ]);
             } else {
                 // Display a default error page
-                $response = new Phtml($e->getProject());
+                $response = new Phtml($context);
                 $response
                     ->setStatusCode(404)
                     ->setViewDir(__DIR__ . '/Scripts')
                     ->setViewFilename('error.phtml')
                     ->setViewParams([
-                        'project' => $e->getProject(),
-                        'url' => $e->getUrl(),
                         'statusCode' => 404,
-                        'message' => $e->getMessage()
+                        'exceptionMessage' => $e->getMessage()
                     ])
                     ->render();
             }

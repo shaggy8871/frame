@@ -79,4 +79,14 @@ class Url
 
     }
 
+    /*
+     * Returns true if the property exists
+     */
+    public function __isset($property)
+    {
+
+        return property_exists($this, $property)
+
+    }
+
 }

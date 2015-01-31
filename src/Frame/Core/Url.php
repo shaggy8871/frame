@@ -54,7 +54,28 @@ class Url
     public function __get($property)
     {
 
-        return $this->$property;
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } else {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
+
+    }
+
+    /*
+     * Activate getProperty() style method calls
+     */
+    public function __call($name, $args)
+    {
+
+        if (substr($name, 0, 3) == 'get') {
+            $property = lcfirst(substr($name, 3));
+            if (property_exists($this, $property)) {
+                return $this->$property;
+            } else {
+                throw new UnknownPropertyException($property, __CLASS__);
+            }
+        }
 
     }
 

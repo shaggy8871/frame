@@ -197,18 +197,29 @@ abstract class Foundation
         }
 
         $doc = $reflection->getDocComment();
-        if (!$doc) {
-            throw new ReverseRouteLookupException("The urlFor method expects a DocBlock with @canonical parameter above " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName());
+        if ($doc) {
+            $annotations = Annotations::parseDocBlock($doc);
+            if (isset($annotations['canonical'])) {
+                $canonical = $annotations['canonical'];
+            }
         }
 
-        $annotations = Annotations::parseDocBlock($doc);
-
-        if (!isset($annotations['canonical'])) {
-            throw new ReverseRouteLookupException("The method " . $reflection->getDeclaringClass()->getName() . "::" . $reflection->getName() . " has no @canonical DocBlock configured.");
+        // If it can't be determined from the DocBlock, try to guess it
+        if (!isset($canonical)) {
+            $className = $reflection->getDeclaringClass()->getShortName();
+            if ($className == 'Index') {
+                $className = '';
+            }
+            $methodName = ltrim($reflection->getName(), 'route');
+            if ($methodName == 'Default') {
+                $methodName = '';
+            }
+            $canonical = str_replace('_', '-',
+                strtolower(($className ? '/' . $className : '') . ($methodName ? '/' . $methodName : ''))
+            );
         }
 
         // Replace in parameters
-        $canonical = $annotations['canonical'];
         $canonical = $this->context->getUrl()->rootUri . Url::replaceIntoTemplate($canonical, $params);
 
         return $canonical;

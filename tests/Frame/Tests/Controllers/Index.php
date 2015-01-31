@@ -61,6 +61,22 @@ class Index extends Controller
 
     }
 
+    public function routeUrlForAutodetect1(Get $request, Html $response)
+    {
+
+        // Route to the local method
+        echo $response->urlFor('routeUrlDestinationAutodetect');
+
+    }
+
+    public function routeUrlForAutodetect2(Get $request, Html $response)
+    {
+
+        // Route to the method within Products controller
+        echo $response->urlFor('Products::routeUrlDestinationAutodetect');
+
+    }
+
     public function routeUrlForFallback1(Get $request, Html $response)
     {
 
@@ -96,6 +112,13 @@ class Index extends Controller
     {
 
         // Used only for routeUrlFor tests
+
+    }
+
+    public function routeUrlDestinationAutodetect()
+    {
+
+        // Used only for routeUrlForAutodetect tests
 
     }
 

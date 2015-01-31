@@ -31,4 +31,11 @@ class Products extends Controller
 
     }
 
+    public function routeUrlDestinationAutodetect()
+    {
+
+        // Used only for routeUrlForAutodetect tests
+
+    }
+
 }

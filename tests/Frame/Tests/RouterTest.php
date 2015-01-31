@@ -21,7 +21,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    public function testUrlFactoryAutoDetect()
+    public function testUrlFactoryAutoDetect1()
     {
 
         // Instantiate test $_SERVER variables
@@ -46,9 +46,32 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($url->pathComponents, ['']);
         $this->assertEquals($url->queryString, 'a=b');
 
-        // Test getter methods
+    }
+
+    public function testUrlFactoryAutoDetect2()
+    {
+
+        // Instantiate test $_SERVER variables
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['HTTP_HOST'] = 'www.testframe.com';
+        $_SERVER['SERVER_PORT'] = 80;
+        $_SERVER['SCRIPT_NAME'] = '/frame/public/index.php';
+        $_SERVER['SCRIPT_FILENAME'] = 'index.php';
+        $_SERVER['PATH_INFO'] = '/';
+        $_SERVER['QUERY_STRING'] = 'a=b';
+
+        $url = UrlFactory::autodetect();
+
+        // Test with getter methods
         $this->assertEquals($url->getRequestMethod(), 'GET');
         $this->assertEquals($url->getRequestUri(), '/');
+        $this->assertEquals($url->getRootUri(), '/frame/public/index.php');
+        $this->assertEquals($url->getRootBasePath(), '/frame/public');
+        $this->assertEquals($url->getScheme(), 'http');
+        $this->assertEquals($url->getHost(), 'www.testframe.com');
+        $this->assertEquals($url->getPort(), 80);
+        $this->assertEquals($url->getPathComponents(), ['']);
+        $this->assertEquals($url->getQueryString(), 'a=b');
 
     }
 
@@ -139,6 +162,22 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $this->expectOutputString('/urlDestination/val');
         $this->router->parseUrl($this->generateUrl('/urlFor'));
+
+    }
+
+    public function testUrlForAutodetect1()
+    {
+
+        $this->expectOutputString('/urldestinationautodetect');
+        $this->router->parseUrl($this->generateUrl('/urlforautodetect1'));
+
+    }
+
+    public function testUrlForAutodetect2()
+    {
+
+        $this->expectOutputString('/products/urldestinationautodetect');
+        $this->router->parseUrl($this->generateUrl('/urlforautodetect2'));
 
     }
 

@@ -73,6 +73,11 @@ class Twig extends Foundation implements ResponseInterface
         $this->context->getProject()->config->twig->addFunction(
             new \Twig_SimpleFunction('urlFor', [$this, 'urlFor'])
         );
+        // Set a few global parameters
+        $this->context->getProject()->config->twig->addGlobal('frame', [
+            'project' => $this->context->getProject(),
+            'url' => $this->context->getUrl()
+        ]);
 
         $params = ($params ?: $this->viewParams);
 

@@ -209,7 +209,7 @@ abstract class Foundation
 
         // Replace in parameters
         $canonical = $annotations['canonical'];
-        $canonical = Url::replaceIntoTemplate($canonical, $params);
+        $canonical = $this->context->getUrl()->rootUri . Url::replaceIntoTemplate($canonical, $params);
 
         return $canonical;
 

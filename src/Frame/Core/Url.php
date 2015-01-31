@@ -57,7 +57,7 @@ class Url
         if (property_exists($this, $property)) {
             return $this->$property;
         } else {
-            throw new UnknownPropertyException($property, __CLASS__);
+            throw new Exception\UnknownPropertyException($property, __CLASS__);
         }
 
     }
@@ -73,7 +73,7 @@ class Url
             if (property_exists($this, $property)) {
                 return $this->$property;
             } else {
-                throw new UnknownPropertyException($property, __CLASS__);
+                throw new Exception\UnknownPropertyException($property, __CLASS__);
             }
         }
 

@@ -37,11 +37,16 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         // Make sure we get it back as expected
         $this->assertEquals($url->requestMethod, 'GET');
         $this->assertEquals($url->requestUri, '/');
+        $this->assertEquals($url->rootUri, '');
         $this->assertEquals($url->scheme, 'http');
         $this->assertEquals($url->host, 'www.testframe.com');
         $this->assertEquals($url->port, 80);
         $this->assertEquals($url->pathComponents, ['']);
         $this->assertEquals($url->queryString, 'a=b');
+
+        // Test getter methods
+        $this->assertEquals($url->getRequestMethod(), 'GET');
+        $this->assertEquals($url->getRequestUri(), '/');
 
     }
 

@@ -15,11 +15,12 @@ class Project
     public function __construct($ns, $path, $debugMode)
     {
 
+        $configClass = $ns . '\\Config';
+
         $this->ns = $ns;
         $this->path = ($path ? realpath($path) . '/' : '') . str_replace('\\', '/', $ns);
-
+        $this->debugMode = $debugMode;
         // Do we have a configuration class?
-        $configClass = $ns . '\\Config';
         $this->config = (class_exists($configClass) ? new $configClass($this) : new \stdClass());
 
     }

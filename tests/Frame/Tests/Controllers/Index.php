@@ -61,6 +61,13 @@ class Index extends Controller
 
     }
 
+    public function routeUrlForHome(Get $request, Html $response)
+    {
+
+        echo $response->urlFor('routeDefault');
+
+    }
+
     public function routeUrlForAutodetect1(Get $request, Html $response)
     {
 

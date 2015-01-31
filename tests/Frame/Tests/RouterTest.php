@@ -165,6 +165,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testUrlForHome()
+    {
+
+        $this->expectOutputString('/');
+        $this->router->parseUrl($this->generateUrl('/urlForHome'));
+
+    }
+
     public function testUrlForAutodetect1()
     {
 

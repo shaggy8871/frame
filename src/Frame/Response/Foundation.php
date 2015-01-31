@@ -215,7 +215,7 @@ abstract class Foundation
                 $methodName = '';
             }
             $canonical = str_replace('_', '-',
-                strtolower(($className ? '/' . $className : '') . ($methodName ? '/' . $methodName : ''))
+                strtolower(($className ? '/' . $className : '') . ($methodName ? '/' . $methodName : '/'))
             );
         }
 

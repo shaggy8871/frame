@@ -71,7 +71,7 @@ class Index extends Controller
     }
 
     /**
-     * @canonical /
+     * This is the home page
      */
     public function routeDefault(Get $request, Twig $response)
     {
@@ -79,6 +79,21 @@ class Index extends Controller
         return [
             'title' => 'Welcome to Frame',
             'content' => 'You\'re on the home page. You can customize this view in <Yourapp>/Views/Index/default.html.twig and <Yourapp>/Views/base.html.twig.'
+        ];
+
+    }
+
+    /**
+     * This is an example about us page
+     */
+    public function routeAbout(Get $request, Twig $response)
+    {
+
+        $response->setViewFilename('Index/default.html.twig');
+
+        return [
+            'title' => 'About Us',
+            'content' => 'You can customize this page in <Yourapp>/Views/Index/about.html.twig.'
         ];
 
     }

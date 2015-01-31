@@ -85,7 +85,7 @@ class Url
     public function __isset($property)
     {
 
-        return property_exists($this, $property)
+        return property_exists($this, $property);
 
     }
 

@@ -12,6 +12,7 @@ class Url
     protected $requestMethod;
     protected $requestUri;
     protected $rootUri;
+    protected $rootBasePath;
     protected $scheme;
     protected $host;
     protected $port;
@@ -29,6 +30,9 @@ class Url
         }
         if (isset($urlComponents['rootUri'])) {
             $this->rootUri = $urlComponents['rootUri'];
+        }
+        if (isset($urlComponents['rootBasePath'])) {
+            $this->rootBasePath = $urlComponents['rootBasePath'];
         }
         if (isset($urlComponents['scheme'])) {
             $this->scheme = $urlComponents['scheme'];

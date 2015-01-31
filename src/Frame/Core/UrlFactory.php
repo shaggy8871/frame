@@ -31,7 +31,9 @@ class UrlFactory
         if (strpos($requestUri, '?') !== false) {
             $requestUri = strstr($requestUri, '?', true);
         }
-        $rootUri = (isset($_SERVER['SCRIPT_NAME']) ? rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') : '/');
+
+        $rootBasePath = (isset($_SERVER['SCRIPT_NAME']) ? rtrim(dirname($_SERVER['SCRIPT_NAME']), '/') : '/');
+        $rootUri = ($rootBasePath == '' ? '' : (isset($_SERVER['SCRIPT_NAME']) ? rtrim($_SERVER['SCRIPT_NAME'], '/') : '/'));
 
         $pathParsed = parse_url($scheme . '://' . $host . $requestUri . (isset($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : ''));
         $pathComponents = explode('/', substr($pathParsed['path'], 1));
@@ -42,6 +44,7 @@ class UrlFactory
             'requestMethod' => $requestMethod,
             'requestUri' => $requestUri,
             'rootUri' => $rootUri,
+            'rootBasePath' => $rootBasePath,
             'scheme' => $scheme,
             'host' => $host,
             'port' => $port,

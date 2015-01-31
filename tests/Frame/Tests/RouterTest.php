@@ -28,6 +28,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['HTTP_HOST'] = 'www.testframe.com';
         $_SERVER['SERVER_PORT'] = 80;
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
         $_SERVER['SCRIPT_FILENAME'] = 'index.php';
         $_SERVER['PATH_INFO'] = '/';
         $_SERVER['QUERY_STRING'] = 'a=b';

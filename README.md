@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/shaggy8871/frame.svg?branch=master)](https://travis-ci.org/shaggy8871/frame)
 
-Frame is a flyweight PHP framework. It's easy to get started, requires almost zero configuration, and can run within existing projects without a major rewrite.
+Frame is a lightweight MVC routing framework for PHP. It's easy to get started, requires almost zero configuration, and can run within existing projects without a major rewrite.
 
 Installation:
 

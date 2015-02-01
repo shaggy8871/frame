@@ -1,6 +1,6 @@
 {
     "name": "shaggy8871/frame",
-    "description": "Frame is a flyweight PHP framework",
+    "description": "Frame is a lightweight MVC routing framework for PHP",
     "license": "MIT",
     "authors": [
         {

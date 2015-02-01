@@ -8,12 +8,6 @@ Installation:
 
 In composer.json:
 ```
-"repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/shaggy8871/frame"
-    }
-],
 "require": {
     "shaggy8871/frame": "dev-master"
 }

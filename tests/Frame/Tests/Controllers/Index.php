@@ -105,6 +105,16 @@ class Index extends Controller
 
     }
 
+    public function routeUrlForSuffix(Get $request, Html $response)
+    {
+
+        // Test suffix on URL
+        echo $response->urlFor('routeUrlDestinationSuffix', [
+            'var' => 'val'
+        ]);
+
+    }
+
     public function routeTwigUrlFor(Get $request, Twig $response)
     {
 
@@ -116,6 +126,16 @@ class Index extends Controller
      * @canonical /urlDestination/:var
      */
     public function routeUrlDestination()
+    {
+
+        // Used only for routeUrlFor tests
+
+    }
+
+    /**
+     * @canonical /urlDestination/:var/suffix
+     */
+    public function routeUrlDestinationSuffix()
     {
 
         // Used only for routeUrlFor tests

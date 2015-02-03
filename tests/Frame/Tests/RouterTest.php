@@ -205,6 +205,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public function testUrlForSuffix()
+    {
+
+        $this->expectOutputString('/urlDestination/val/suffix');
+        $this->router->parseUrl($this->generateUrl('/urlForSuffix'));
+
+    }
+
     public function testUrlForWithTwig()
     {
 

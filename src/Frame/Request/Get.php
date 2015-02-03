@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-class Get extends Request
+class Get extends Foundation
 {
 
     protected $get = array();

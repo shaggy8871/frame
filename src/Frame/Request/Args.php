@@ -6,7 +6,7 @@ namespace Frame\Request;
  * Get command line arguments
  */
 
-class Args extends Request
+class Args extends Foundation
 {
 
     private $args = array();

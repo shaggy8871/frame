@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-class Post extends Request
+class Post extends Foundation
 {
 
     protected $post = array();

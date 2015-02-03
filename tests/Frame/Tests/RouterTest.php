@@ -7,7 +7,8 @@ use Frame\Core\Url;
 use Frame\Core\UrlFactory;
 use Frame\Core\Router;
 
-class RouterTest extends \PHPUnit_Framework_TestCase {
+class RouterTest extends \PHPUnit_Framework_TestCase
+{
 
     private $router;
 

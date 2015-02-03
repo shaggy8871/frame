@@ -223,6 +223,21 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
     }
 
+    public static function setUpBeforeClass()
+    {
+
+        exec("mkdir " . __DIR__ . "/Views/cache");
+        exec("chmod 777 " . __DIR__ . "/Views/cache");
+
+    }
+
+    public static function tearDownAfterClass()
+    {
+
+        exec("rm -rf " . __DIR__ . "/Views/cache");
+
+    }
+
     /*
      * Construct a Url object using the supplied requestUri
      */

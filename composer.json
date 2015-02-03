@@ -10,7 +10,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=5.4.1"
+        "php": ">=5.4.1",
+        "twig/twig": "~1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "4.4.*"
@@ -19,8 +20,5 @@
         "psr-0": {
             "Frame\\": "src/"
         }
-    },
-    "suggest": {
-        "twig/twig": "Frame plays nicely with the Twig templating engine"
     }
 }

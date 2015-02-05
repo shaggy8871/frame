@@ -84,6 +84,17 @@ class Index extends Controller
 
     }
 
+    /**
+     * @canonical /differentName
+     */
+    public function routeUrlForAutodetect3(Get $request, Html $response)
+    {
+
+        // Route to the local method
+        echo 'routeUrlDestinationCanonical';
+
+    }
+
     public function routeUrlForFallback1(Get $request, Html $response)
     {
 
@@ -115,6 +126,16 @@ class Index extends Controller
 
     }
 
+    public function routeUrlForExtension(Get $request, Html $response)
+    {
+
+        // Test suffix on URL
+        echo $response->urlFor('routeUrlDestinationExtension', [
+            'var' => 'another-val'
+        ]);
+
+    }
+
     public function routeTwigUrlFor(Get $request, Twig $response)
     {
 
@@ -136,6 +157,16 @@ class Index extends Controller
      * @canonical /urlDestination/:var/suffix
      */
     public function routeUrlDestinationSuffix()
+    {
+
+        // Used only for routeUrlFor tests
+
+    }
+
+    /**
+     * @canonical /urlDestination/:var.json
+     */
+    public function routeUrlDestinationExtension()
     {
 
         // Used only for routeUrlFor tests

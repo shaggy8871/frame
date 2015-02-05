@@ -158,6 +158,33 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testCaseTestRoute()
+    {
+
+        $this->expectOutputString('CaseTestRouteDefault');
+
+        $this->router->parseUrl($this->generateUrl('/CaSetESt'));
+
+    }
+
+    public function testCaseTestRouteSubDir()
+    {
+
+        $this->expectOutputString('CaseTestRouteSubDir');
+
+        $this->router->parseUrl($this->generateUrl('/CaSetESt/SuBDir'));
+
+    }
+
+    public function testCaseTestRouteNumbers()
+    {
+
+        $this->expectOutputString('CaseTestRouteNumbers99');
+
+        $this->router->parseUrl($this->generateUrl('/CaSetESt/99'));
+
+    }
+
     public function testUrlFor()
     {
 
@@ -190,6 +217,22 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testUrlForAutodetect3()
+    {
+
+        $this->expectOutputString('routeUrlDestinationCanonical');
+        $this->router->parseUrl($this->generateUrl('/differentName'));
+
+    }
+
+    public function testUrlForAutodetect4()
+    {
+
+        $this->expectOutputString('ProductsRouteUrlDestinationCanonical99');
+        $this->router->parseUrl($this->generateUrl('/products/canonical/99'));
+
+    }
+
     public function testUrlForFallback1()
     {
 
@@ -211,6 +254,14 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
         $this->expectOutputString('/urlDestination/val/suffix');
         $this->router->parseUrl($this->generateUrl('/urlForSuffix'));
+
+    }
+
+    public function testUrlForExtension()
+    {
+
+        $this->expectOutputString('/urlDestination/another-val.json');
+        $this->router->parseUrl($this->generateUrl('/urlForExtension'));
 
     }
 

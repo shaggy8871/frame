@@ -9,7 +9,7 @@ use Frame\Request\Request;
 class RouteParams extends Foundation
 {
 
-    protected $routeParams = array();
+    protected $routeParams = [];
 
     /*
      * Route param values are simply stored as object properties - unsanitized!

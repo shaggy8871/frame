@@ -23,7 +23,7 @@ class Url
                         return '/?([A-Za-z0-9_-]+)?';
                     }
                 }, $urlTemplate
-            )) . '/';
+            )) . '/i';
 
     }
 

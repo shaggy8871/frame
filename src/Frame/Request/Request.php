@@ -5,13 +5,28 @@ namespace Frame\Request;
 class Request extends Foundation
 {
 
+    const TYPE_GET = 'Get';
+    const TYPE_POST = 'Post';
+    const TYPE_PUT = 'Put';
+    const TYPE_DELETE = 'Delete';
+    const TYPE_OPTIONS = 'Options';
+
+    protected $get;
+    protected $post;
+    protected $args;
+    protected $routeParams;
+
     /*
      * Returns a GET request object
      */
     public function get()
     {
 
-        return new Get($this->context);
+        if (!$this->get) {
+            $this->get = new Get($this->context);
+        }
+
+        return $this->get;
 
     }
 
@@ -21,7 +36,11 @@ class Request extends Foundation
     public function post()
     {
 
-        return new Post($this->context);
+        if (!$this->post) {
+            $this->post = new Post($this->context);
+        }
+
+        return $this->post;
 
     }
 
@@ -31,7 +50,11 @@ class Request extends Foundation
     public function args()
     {
 
-        return new Args($this->context);
+        if (!$this->args) {
+            $this->args = new Args($this->context);
+        }
+
+        return $this->args;
 
     }
 
@@ -41,7 +64,11 @@ class Request extends Foundation
     public function routeParams()
     {
 
-        return RouteParams::createFromRequest($this);
+        if (!$this->routeParams) {
+            $this->routeParams = RouteParams::createFromRequest($this);
+        }
+
+        return $this->routeParams;
 
     }
 

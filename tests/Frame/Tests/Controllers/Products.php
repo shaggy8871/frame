@@ -31,6 +31,16 @@ class Products extends Controller
 
     }
 
+    /**
+     * @canonical /products/canonical/:id
+     */
+    public function routeUrlDestinationCanonical(RouteParams $request)
+    {
+
+        echo 'ProductsRouteUrlDestinationCanonical' . $request->id;
+
+    }
+
     public function routeUrlDestinationAutodetect()
     {
 

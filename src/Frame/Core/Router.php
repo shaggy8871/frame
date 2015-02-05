@@ -111,9 +111,8 @@ class Router
         $path = $pathComponents;
         $method = self::ROUTE_RESOLVER;
         $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
-        if (method_exists($controller, $method)) {
-
-            $controllerClass = new $controller($this->project);
+        $controllerClass = (class_exists($controller) ? new $controller($this->project) : null);
+        if (($controllerClass) && (method_exists($controllerClass, $method))) {
 
             // Call routeResolver in the controller class
             $route = call_user_func(array($controllerClass, $method), $this->url);
@@ -153,8 +152,11 @@ class Router
             $methodName = array_shift($path);
             $method = ($methodName != null ? 'route' . $methodName : self::ROUTE_DEFAULT);
             $controller = $projectControllers . $controllerClass;
-            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-                return $this->invokeClassMethod(new $controller($this->project), $method);
+            if (class_exists($controller)) {
+                $methodFound = $this->findMethod($controller, $method);
+                if ($methodFound) {
+                    return $methodFound;
+                }
             }
         } else {
             $path = $pathComponents;
@@ -162,14 +164,20 @@ class Router
             // Attempt 3.1: check for a controller with routeDefault method
             $method = self::ROUTE_DEFAULT;
             $controller = $projectControllers . $lookupName;
-            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-                return $this->invokeClassMethod(new $controller($this->project), $method);
+            if (class_exists($controller)) {
+                $methodFound = $this->findMethod($controller, $method);
+                if ($methodFound) {
+                    return $methodFound;
+                }
             }
             // Attempt 3.2: look for a method in the Index controller
             $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
             $controller = $projectControllers . 'Index';
-            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
-                return $this->invokeClassMethod(new $controller($this->project), $method);
+            if (class_exists($controller)) {
+                $methodFound = $this->findMethod($controller, $method);
+                if ($methodFound) {
+                    return $methodFound;
+                }
             }
         }
 
@@ -446,6 +454,52 @@ class Router
             $controllerPath = pathinfo($controllerClassReflection->getFileName());
             // Inject view filename
             $responseClass->setViewFilename($controllerPath['filename'] . '/' . strtolower(str_replace('route', '', $reflection->getName())));
+        }
+
+    }
+
+    /*
+     * Attempt to find the appropriate method to call
+     */
+    private function findMethod($controller, $method)
+    {
+
+        if (method_exists($controller, $method)) {
+            $this->invokeClassMethod(new $controller($this->project), $method);
+            // Return true to indicate that a method is found
+            return true;
+        }
+
+        $methodMatch = $this->scanForMethodMatches($controller);
+        if ($methodMatch) {
+            $this->invokeClassMethod(new $controller($this->project), $methodMatch);
+            // Return true to indicate that a method is found
+            return true;
+        }
+
+        return false;
+
+    }
+
+    /*
+     * Find a matching method using annotation matching
+     */
+    private function scanForMethodMatches($controller)
+    {
+
+        $controllerClassReflection = new \ReflectionClass($controller);
+        $methods = $controllerClassReflection->getMethods();
+        foreach($methods as $method) {
+            if ($method->getDocComment()) {
+                $annotation = Utils\Annotations::parseDocBlock($method->getDocComment());
+                if (isset($annotation['canonical'])) {
+                    $canonical = Utils\Url::templateToRegex($annotation['canonical'], $keys);
+                    // Return as soon as a match is found
+                    if (preg_match($canonical, $this->url->getRequestUri())) {
+                        return $method->getName();
+                    }
+                }
+            }
         }
 
     }

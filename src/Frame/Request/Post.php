@@ -5,7 +5,7 @@ namespace Frame\Request;
 class Post extends Foundation
 {
 
-    protected $post = array();
+    protected $post = [];
 
     /*
      * POST values are simply stored as object properties - unsanitized!

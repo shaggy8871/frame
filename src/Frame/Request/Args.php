@@ -9,7 +9,7 @@ namespace Frame\Request;
 class Args extends Foundation
 {
 
-    private $args = array();
+    private $args = [];
 
     /*
      * Console arguments are simply stored as object properties - unsanitized!

@@ -151,8 +151,8 @@ class Router
             $controllerClass = array_shift($path);
             $methodName = array_shift($path);
             $method = ($methodName != null ? 'route' . $methodName : self::ROUTE_DEFAULT);
-            $controller = $projectControllers . $controllerClass;
-            if (class_exists($controller)) {
+            $controller = $this->findController($controllerClass);
+            if ($controller) {
                 $methodFound = $this->findMethod($controller, $method);
                 if ($methodFound) {
                     return $methodFound;
@@ -163,8 +163,8 @@ class Router
             $lookupName = array_shift($path);
             // Attempt 3.1: check for a controller with routeDefault method
             $method = self::ROUTE_DEFAULT;
-            $controller = $projectControllers . $lookupName;
-            if (class_exists($controller)) {
+            $controller = $this->findController($lookupName);
+            if ($controller) {
                 $methodFound = $this->findMethod($controller, $method);
                 if ($methodFound) {
                     return $methodFound;
@@ -172,8 +172,8 @@ class Router
             }
             // Attempt 3.2: look for a method in the Index controller
             $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
-            $controller = $projectControllers . 'Index';
-            if (class_exists($controller)) {
+            $controller = $this->findController('Index');
+            if ($controller) {
                 $methodFound = $this->findMethod($controller, $method);
                 if ($methodFound) {
                     return $methodFound;
@@ -200,12 +200,10 @@ class Router
             $pathComponent = str_replace('-', '_', ucfirst($pathComponent));
         }
 
-        $projectControllers = $this->project->ns . '\\Controllers\\';
-
         // Attempt 1: if we have a controller class, look for a routeNotFound method
         $path = $pathComponents;
         $method = self::ROUTE_NOTFOUND;
-        $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
+        $controller = $this->findController((empty($path) ? 'Index' : $path[0]));
         if ((class_exists($controller)) && (is_callable($controller . '::' . $method))) {
             return (new $controller($this->project))->$method($this->url, $this->project);
         }
@@ -454,6 +452,38 @@ class Router
             $controllerPath = pathinfo($controllerClassReflection->getFileName());
             // Inject view filename
             $responseClass->setViewFilename($controllerPath['filename'] . '/' . strtolower(str_replace('route', '', $reflection->getName())));
+        }
+
+    }
+
+    /*
+     * Find a controller that matches the name specified
+     */
+    private function findController($controller)
+    {
+
+        if (!$controller) {
+            return false;
+        }
+
+        $projectControllers = $this->project->ns . '\\Controllers\\';
+
+        if (class_exists($projectControllers . $controller)) {
+            return $projectControllers . $controller;
+        }
+
+        // Fallback
+        $glob = '';
+        $controllerLength = strlen($controller);
+        for($i = 0; $i < $controllerLength; $i++) {
+            $glob .= '[' . strtolower($controller[$i]) . strtoupper($controller[$i]) . ']';
+        }
+        $glob = $this->project->path . '/Controllers/' . $glob . '.php';
+
+        // Use glob range search to find a case insensitive match
+        $match = glob($glob, GLOB_NOSORT);
+        if ($match) {
+            return $projectControllers . basename(array_shift($match), '.php');
         }
 
     }

@@ -3,6 +3,7 @@
 namespace Frame\Tests\Controllers;
 
 use Frame\Core\Controller;
+use Frame\Request\RouteParams;
 
 class Products extends Controller
 {

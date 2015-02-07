@@ -3,8 +3,10 @@
 namespace Frame\Tests\Controllers;
 
 use Frame\Core\Controller;
+// Request types
 use Frame\Request\Get;
 use Frame\Request\RouteParams;
+// Response types
 use Frame\Response\Html;
 use Frame\Response\Json;
 use Frame\Response\Jsonp;
@@ -61,7 +63,10 @@ class Index extends Controller
 
     }
 
-    public function routeUrlForHome(Get $request, Html $response)
+    /*
+     * Swapped the order to test injection
+     */
+    public function routeUrlForHome(Html $response, Get $request)
     {
 
         echo $response->urlFor('routeDefault');
@@ -126,7 +131,7 @@ class Index extends Controller
 
     }
 
-    public function routeUrlForExtension(Get $request, Html $response)
+    public function routeUrlForExtension(Get $request, Html $response, $test)
     {
 
         // Test suffix on URL
@@ -140,6 +145,22 @@ class Index extends Controller
     {
 
         return array();
+
+    }
+
+    /*
+     * Custom model injection test
+     */
+    public function routeTestsModelsInject(\Frame\Tests\Models\Inject $inject)
+    {
+
+    }
+
+    /*
+     * Custom model instantiation test
+     */
+    public function routeTestsModelsInstantiateRequest(\Frame\Tests\Models\InstantiateRequest $request = null)
+    {
 
     }
 

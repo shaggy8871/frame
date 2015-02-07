@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-class Request extends Foundation
+class Request extends Foundation implements RequestInterface
 {
 
     const TYPE_GET = 'Get';
@@ -10,9 +10,11 @@ class Request extends Foundation
     const TYPE_PUT = 'Put';
     const TYPE_DELETE = 'Delete';
     const TYPE_OPTIONS = 'Options';
+    const TYPE_PATCH = 'Path';
 
     protected $get;
     protected $post;
+    protected $put;
     protected $args;
     protected $routeParams;
 
@@ -45,6 +47,20 @@ class Request extends Foundation
     }
 
     /*
+     * Returns a PUT request object
+     */
+    public function put()
+    {
+
+        if (!$this->put) {
+            $this->put = new Put($this->context);
+        }
+
+        return $this->put;
+
+    }
+
+    /*
      * Returns an Args request object
      */
     public function args()
@@ -69,6 +85,16 @@ class Request extends Foundation
         }
 
         return $this->routeParams;
+
+    }
+
+    /*
+     * To meet contract requirements
+     */
+    public function toArray()
+    {
+
+        return [];
 
     }
 

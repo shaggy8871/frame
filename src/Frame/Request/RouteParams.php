@@ -6,7 +6,7 @@ use Frame\Core\Context;
 use Frame\Core\Utils\Url;
 use Frame\Request\Request;
 
-class RouteParams extends Foundation
+class RouteParams extends Foundation implements RequestInterface
 {
 
     protected $routeParams = [];

@@ -121,7 +121,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
-
     public function testProductsRouteDefault()
     {
 
@@ -280,6 +279,24 @@ class RouterTest extends \PHPUnit_Framework_TestCase
         $this->expectOutputString(json_encode(['with' => 'flash']));
 
         $this->router->parseUrl($this->generateUrl('/flash'));
+
+    }
+
+    public function testModelsInjection()
+    {
+
+        $this->expectOutputString('TestsModelsInject');
+
+        $this->router->parseUrl($this->generateUrl('/testsmodelsinject'));
+
+    }
+
+    public function testModelsInstantiateRequest()
+    {
+
+        $this->expectOutputString('TestsModelsInstantiateRequest');
+
+        $this->router->parseUrl($this->generateUrl('/testsmodelsinstantiaterequest'));
 
     }
 

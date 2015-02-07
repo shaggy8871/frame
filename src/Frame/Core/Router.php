@@ -17,17 +17,10 @@ class Router
     const ROUTE_RESOLVER = 'routeResolver';
     const ROUTE_NOTFOUND = 'routeNotFound';
     const ROUTE_DEFAULT  = 'routeDefault';
-    const PARAM_REQUEST  = 0;
-    const PARAM_RESPONSE = 1;
 
     private $project;
     private $url;
     private $caller;
-    // Order of namespace aliases for request/response parameters
-    private $paramAliases = [
-        'Frame\\Request',
-        'Frame\\Response'
-    ];
 
     public function __construct(Project $project, Url $url = null)
     {
@@ -281,62 +274,44 @@ class Router
         $params = $reflection->getParameters();
         // Injection array
         $inject = [];
+        // Find first response class to set it as default
+        $defaultResponseClass = null;
         // Loop through parameters to determine their class types
         foreach($params as $param) {
-            try {
-                $paramClass = $param->getClass();
-            } catch (\ReflectionException $e) {
-                // Try to alias it in
-                $matched = preg_match('/Class ([A-Za-z0-9_\\\-]+) does not exist/', $e->getMessage(), $matches);
-                if (!$matched) {
-                    // Re-throw error
-                    throw new \Exception($e->getMessage);
-                }
-                // What number parameter is this?
-                $paramPos = $param->getPosition();
-                // Do I have an alias for this parameter?
-                if (!isset($this->paramAliases[$paramPos])) {
-                    throw new UnknownAliasException($this->getParamClassName($param), ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
-                }
-                // Determine the alias
-                $aliasNamespace = explode('\\', $matches[1]);
-                $aliasClass = array_pop($aliasNamespace);
-                $alias = $this->paramAliases[$paramPos] . '\\' . $aliasClass;
-                // Create alias
-                $this->createAlias($alias, $matches[1]);
-                // Try to get the class again
-                try {
-                    $paramClass = $param->getClass();
-                } catch (\ReflectionException $e) {
-                    throw new ClassNotFoundException($alias, ($class ? get_class($class) : ''), $param->getDeclaringFunction()->name);
-                }
+            $paramClass = $param->getClass();
+            // If it's not a class, inject a null value
+            if (!($paramClass instanceof \ReflectionClass)) {
+                $inject[] = null;
+                continue;
             }
-            // If we get this far, we should have the class aliased and auto-loaded
-            if ($paramClass instanceof \ReflectionClass) {
-                // Special case for a Url and Project type hints, send in the one we already have
-                if ($paramClass->name == 'Frame\\Core\\Url') {
-                    $inject[] = $this->url;
-                } else
-                if ($paramClass->name == 'Frame\\Core\\Project') {
-                    $inject[] = $this->url;
-                } else
-                if ($paramClass->name == 'Frame\\Core\\Context') {
-                    $inject[] = new Context($this->project, $this->url, $this->caller);
+            // Special case for a Url and Project type hints, send in the one we already have
+            if ($paramClass->name == 'Frame\\Core\\Url') {
+                $inject[] = $this->url;
+            } else
+            if ($paramClass->name == 'Frame\\Core\\Project') {
+                $inject[] = $this->project;
+            } else
+            if ($paramClass->name == 'Frame\\Core\\Context') {
+                $inject[] = new Context($this->project, $this->url, $this->caller);
+            } else {
+                if ($this->isRequestClass($paramClass->name, false)) {
+                    $paramInstance = $this->instantiateRequestClass($param, $paramClass);
                 } else {
-                    $paramPos = $param->getPosition();
-                    if ($paramPos == self::PARAM_REQUEST) {
-                        $paramInstance = $this->instantiateRequestClass($param, $paramClass);
-                    } else {
-                        $paramInstance = new $paramClass->name(
-                            new Context($this->project, $this->url, $this->caller)
-                        );
-                    }
-                    // If this is a response class (parameter 2), set the default view filename
-                    if (($class) && ($paramPos == self::PARAM_RESPONSE) && (is_callable(array($paramInstance, 'setDefaults')))) {
+                    $paramInstance = new $paramClass->name(
+                        new Context($this->project, $this->url, $this->caller)
+                    );
+                }
+                // If this is a response class, set the default view filename
+                if ($this->isResponseClass($paramInstance)) {
+                    if (($class) && (is_callable(array($paramInstance, 'setDefaults')))) {
                         $this->setResponseDefaults($paramInstance, $reflection, $class);
                     }
-                    $inject[] = $paramInstance;
+                    // Set the default response class if one isn't already set
+                    if (!$defaultResponseClass) {
+                        $defaultResponseClass = $paramInstance;
+                    }
                 }
+                $inject[] = $paramInstance;
             }
         }
 
@@ -350,11 +325,12 @@ class Router
         if (($response !== false) && ($response !== null)) {
             // If object is a Response class, simply call the render method (assume it knows what to do)
             // Otherwise call the render method on the defined/default response class
-            if ((is_object($response)) && (in_array('Frame\\Response\\ResponseInterface', class_implements($response, true)))) {
+            if ((is_object($response)) && ($this->isResponseClass($response))) {
                 $response->render();
             } else {
-                if (array_key_exists(self::PARAM_RESPONSE, $inject)) {
-                    $responseClass = $inject[self::PARAM_RESPONSE];
+                // If we have a default response class set, use it
+                if ($defaultResponseClass) {
+                    $responseClass = $defaultResponseClass;
                 } else {
                     $responseClass = new \Frame\Response\Html(
                         new Context($this->project, $this->url, $this->caller)
@@ -372,10 +348,30 @@ class Router
     }
 
     /*
-    * Special case for request parameters
-    * If the parameter class contains a static createFromRequest method,
-    * ask it to instantiate the class for us using the request data supplied.
-    */
+     * Returns true if it's a Request class
+     */
+    private function isRequestClass($class, $autoload = true)
+    {
+
+        return in_array('Frame\\Request\\RequestInterface', class_implements($class, $autoload));
+
+    }
+
+    /*
+     * Returns true if it's a Response class
+     */
+    private function isResponseClass($class, $autoload = true)
+    {
+
+        return in_array('Frame\\Response\\ResponseInterface', class_implements($class, $autoload));
+
+    }
+
+    /*
+     * Special case for request parameters
+     * If the parameter class contains a static createFromRequest method,
+     * ask it to instantiate the class for us using the request data supplied.
+     */
     private function instantiateRequestClass($param, $paramClass)
     {
 
@@ -389,10 +385,6 @@ class Router
                     new Context($this->project, $this->url, $this->caller)
                 );
             }
-
-            // Create a local alias for the Request\Request class
-            // @deprecated
-            $this->createAlias('Frame\\Request\\Request', $paramClass->getNamespaceName() . '\\Request');
 
             $paramInstance = $paramFactory->invoke(null, new \Frame\Request\Request(
                 new Context($this->project, $this->url, $this->caller)

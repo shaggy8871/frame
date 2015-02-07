@@ -16,18 +16,7 @@ abstract class Foundation
 
         // Attempt to guess the type
         if (isset($_SERVER['REQUEST_METHOD'])) {
-            $requestMethod = $_SERVER['REQUEST_METHOD'];
-            switch ($requestMethod) {
-                case 'POST':
-                    $this->type = 'Post';
-                    break;
-                case 'GET':
-                    $this->type = 'Get';
-                    break;
-                default:
-                    $this->type = ucfirst($requestMethod);
-                    break;
-            }
+            $this->type = ucfirst($_SERVER['REQUEST_METHOD']);
         } else
         if (php_sapi_name() == 'cli') {
             $this->type = 'Args';

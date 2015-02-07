@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-class Get extends Foundation
+class Get extends Foundation implements RequestInterface
 {
 
     protected $get = [];

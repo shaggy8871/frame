@@ -2,7 +2,7 @@
 
 namespace Frame\Request;
 
-class Post extends Foundation
+class Post extends Foundation implements RequestInterface
 {
 
     protected $post = [];

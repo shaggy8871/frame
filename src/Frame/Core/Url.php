@@ -6,6 +6,8 @@ namespace Frame\Core;
  * The base Url class stores the URL in workable components
  */
 
+use Frame\Core\Exception\UnknownPropertyException;
+
 class Url
 {
 
@@ -61,7 +63,7 @@ class Url
         if (property_exists($this, $property)) {
             return $this->$property;
         } else {
-            throw new Exception\UnknownPropertyException($property, __CLASS__);
+            throw new UnknownPropertyException($property, __CLASS__);
         }
 
     }

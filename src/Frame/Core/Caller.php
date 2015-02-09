@@ -7,6 +7,8 @@
 
 namespace Frame\Core;
 
+use Frame\Core\Exception\UnknownPropertyException;
+
 class Caller
 {
 
@@ -29,7 +31,11 @@ class Caller
     public function __get($property)
     {
 
-        return $this->$property;
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } else {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
 
     }
 

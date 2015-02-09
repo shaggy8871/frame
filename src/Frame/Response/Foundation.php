@@ -252,6 +252,10 @@ abstract class Foundation
     public function __get($property)
     {
 
+        if (!property_exists($this, $property)) {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
+
         $reflect = new \ReflectionProperty($this, $property);
         if (!$reflect->isPrivate()) {
             return $this->$property;

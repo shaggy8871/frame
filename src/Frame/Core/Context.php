@@ -7,6 +7,8 @@
 
 namespace Frame\Core;
 
+use Frame\Core\Exception\UnknownPropertyException;
+
 class Context
 {
 
@@ -59,7 +61,11 @@ class Context
     public function __get($property)
     {
 
-        return $this->$property;
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } else {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
 
     }
 

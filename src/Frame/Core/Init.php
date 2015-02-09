@@ -3,6 +3,7 @@
 namespace Frame\Core;
 
 use Frame\Core\Exception\ConfigException;
+use Frame\Core\Exception\UnknownPropertyException;
 use Frame\Core\Exception\RouteNotFoundException;
 use Frame\Response\Phtml;
 
@@ -85,7 +86,11 @@ class Init
     public function __get($property)
     {
 
-        return $this->$property;
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } else {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
 
     }
 

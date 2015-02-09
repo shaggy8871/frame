@@ -12,7 +12,7 @@ class Url
     public static function templateToRegex($urlTemplate, &$keys = [])
     {
 
-        return '/' . str_replace('/', '\/',
+        return '/^' . str_replace('/', '\/',
             preg_replace_callback('/([\/\(]*)(\()?:([a-z]+)([\)]*)?/',
                 function($matches) use (&$keys) {
                     $keys[] = $matches[3];
@@ -23,7 +23,7 @@ class Url
                         return '/?([A-Za-z0-9_-]+)?';
                     }
                 }, $urlTemplate
-            )) . '/i';
+            )) . '$/i';
 
     }
 

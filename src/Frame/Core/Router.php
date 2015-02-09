@@ -151,26 +151,27 @@ class Router
                     return $methodFound;
                 }
             }
-        } else {
-            $path = $pathComponents;
-            $lookupName = array_shift($path);
-            // Attempt 3.1: check for a controller with routeDefault method
-            $method = self::ROUTE_DEFAULT;
-            $controller = $this->findController($lookupName);
-            if ($controller) {
-                $methodFound = $this->findMethod($controller, $method);
-                if ($methodFound) {
-                    return $methodFound;
-                }
+        }
+
+        // Attempt 4: check for a controller with routeDefault method
+        $path = $pathComponents;
+        $lookupName = array_shift($path);
+        $method = self::ROUTE_DEFAULT;
+        $controller = $this->findController($lookupName);
+        if ($controller) {
+            $methodFound = $this->findMethod($controller, $method);
+            if ($methodFound) {
+                return $methodFound;
             }
-            // Attempt 3.2: look for a method in the Index controller
-            $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
-            $controller = $this->findController('Index');
-            if ($controller) {
-                $methodFound = $this->findMethod($controller, $method);
-                if ($methodFound) {
-                    return $methodFound;
-                }
+        }
+
+        // Attempt 5: look for a method in the Index controller
+        $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
+        $controller = $this->findController('Index');
+        if ($controller) {
+            $methodFound = $this->findMethod($controller, $method);
+            if ($methodFound) {
+                return $methodFound;
             }
         }
 
@@ -278,7 +279,12 @@ class Router
         $defaultResponseClass = null;
         // Loop through parameters to determine their class types
         foreach($params as $param) {
-            $paramClass = $param->getClass();
+            try {
+                $paramClass = $param->getClass();
+            } catch (\Exception $e) {
+                // Rethrow the error with further information
+                throw new ClassNotFoundException($param->getName(), $this->caller->class, $this->caller->method);
+            }
             // If it's not a class, inject a null value
             if (!($paramClass instanceof \ReflectionClass)) {
                 $inject[] = null;

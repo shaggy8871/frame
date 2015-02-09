@@ -117,7 +117,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
         $this->expectOutputString(json_encode(['id' => '123', 'slug' => 'sluggish']));
 
-        $this->router->parseUrl($this->generateUrl('/index/urlParamsRequest/123/sluggish'));
+        $this->router->parseUrl($this->generateUrl('/urlParamsRequest/123/sluggish'));
 
     }
 

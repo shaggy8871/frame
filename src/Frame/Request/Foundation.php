@@ -68,7 +68,7 @@ abstract class Foundation
     public function getFlash($key)
     {
 
-        return (isset($this->flash->$key) ? $this->flash->$key : null);
+        return (property_exists($this->flash, $key) ? $this->flash->$key : null);
 
     }
 

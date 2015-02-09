@@ -10,7 +10,7 @@ class Request extends Foundation implements RequestInterface
     const TYPE_PUT = 'Put';
     const TYPE_DELETE = 'Delete';
     const TYPE_OPTIONS = 'Options';
-    const TYPE_PATCH = 'Path';
+    const TYPE_PATCH = 'Patch';
 
     protected $get;
     protected $post;
@@ -85,6 +85,66 @@ class Request extends Foundation implements RequestInterface
         }
 
         return $this->routeParams;
+
+    }
+
+    /**
+     * @return Boolean if this request is a GET
+     */
+    public function isGet()
+    {
+
+        return $this->type == self::TYPE_GET;
+
+    }
+
+    /**
+     * @return boolean if this request is a POST
+     */
+    public function isPost()
+    {
+
+        return $this->type == self::TYPE_POST;
+
+    }
+
+    /**
+     * @return boolean if this request is a PUT
+     */
+    public function isPut()
+    {
+
+        return $this->type == self::TYPE_PUT;
+
+    }
+
+    /**
+     * @return boolean if this request is a DELETE
+     */
+    public function isDelete()
+    {
+
+        return $this->type == self::TYPE_DELETE;
+
+    }
+
+    /**
+     * @return boolean if this request is a OPTIONS
+     */
+    public function isOptions()
+    {
+
+        return $this->type == self::TYPE_OPTIONS;
+
+    }
+
+    /**
+     * @return boolean if this request is a PATCH
+     */
+    public function isPatch()
+    {
+
+        return $this->type == self::TYPE_PATCH;
 
     }
 

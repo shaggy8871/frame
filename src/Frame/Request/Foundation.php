@@ -53,6 +53,16 @@ abstract class Foundation
     }
 
     /*
+     * Handy accessor to get the URL straight from the context
+     */
+    public function getUrl()
+    {
+
+        return $this->context->getUrl();
+
+    }
+
+    /*
      * Look up the saved Flash value if available
      */
     public function getFlash($key)

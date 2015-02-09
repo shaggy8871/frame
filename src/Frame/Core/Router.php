@@ -283,7 +283,7 @@ class Router
                 $paramClass = $param->getClass();
             } catch (\Exception $e) {
                 // Rethrow the error with further information
-                throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? $this->caller->controller->getName() : null), $this->caller->method);
+                throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
             }
             // If it's not a class, inject a null value
             if (!($paramClass instanceof \ReflectionClass)) {

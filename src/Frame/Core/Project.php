@@ -5,11 +5,10 @@ namespace Frame\Core;
 class Project
 {
 
-    public $ns;
-    public $path;
-    public $debugMode;
-    public $config;
-
+    protected $ns;
+    protected $path;
+    protected $debugMode;
+    protected $config;
     protected $services;
 
     public function __construct($ns, $path, $debugMode)
@@ -22,6 +21,46 @@ class Project
         $this->debugMode = $debugMode;
         // Do we have a configuration class?
         $this->config = (class_exists($configClass) ? new $configClass($this) : new \stdClass());
+
+    }
+
+    /*
+     * Handy accessor to saved project namespace
+     */
+    public function getNamespace()
+    {
+
+        return $this->ns;
+
+    }
+
+    /*
+     * Handy accessor to saved project path
+     */
+    public function getPath()
+    {
+
+        return $this->path;
+
+    }
+
+    /*
+     * Handy accessor to saved debug mode value
+     */
+    public function getDebugMode()
+    {
+
+        return $this->debugMode;
+
+    }
+
+    /*
+     * Handy accessor to saved config class
+     */
+    public function getConfig()
+    {
+
+        return $this->config;
 
     }
 
@@ -44,6 +83,28 @@ class Project
         if (isset($this->services[$name])) {
             return $this->services[$name];
         }
+
+    }
+
+    /*
+     * Magic getter method maps requests to some protected properties
+     */
+    public function __get($property)
+    {
+
+        return (in_array($property, ['ns', 'path', 'debugMode', 'config']) ?
+            $this->$property : null);
+
+    }
+
+    /*
+     * Returns true if some protected properties exist
+     */
+    public function __isset($property)
+    {
+
+        return (in_array($property, ['ns', 'path', 'debugMode', 'config']) ?
+            property_exists($this, $property) : null);
 
     }
 

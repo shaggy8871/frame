@@ -16,7 +16,7 @@ abstract class Foundation
 
         // Attempt to guess the type
         if (isset($_SERVER['REQUEST_METHOD'])) {
-            $this->type = ucfirst($_SERVER['REQUEST_METHOD']);
+            $this->type = ucfirst(strtolower($_SERVER['REQUEST_METHOD']));
         } else
         if (php_sapi_name() == 'cli') {
             $this->type = 'Args';

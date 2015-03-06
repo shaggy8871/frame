@@ -17,12 +17,12 @@ class RouteParams extends Foundation implements RequestInterface
     public function __construct(Context $context)
     {
 
+        parent::__construct($context);
+
         $this->type = 'RouteParams';
 
         // Default approach to route param parsing
         $this->routeParams = explode('/', $context->getUrl()->requestUri);
-
-        parent::__construct($context);
 
     }
 

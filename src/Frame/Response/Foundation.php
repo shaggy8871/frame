@@ -14,7 +14,7 @@ abstract class Foundation
     protected $context;
     protected $viewDir = '';
     protected $viewFilename = '';
-    protected $viewParams = [];
+    protected $viewParams;
     protected $statusCode = 200;
     protected $contentType = 'text/html';
 

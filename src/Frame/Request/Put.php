@@ -13,10 +13,10 @@ class Put extends Foundation implements RequestInterface
     public function __construct(\Frame\Core\Context $context)
     {
 
+        parent::__construct($context);
+
         $this->type = 'Put';
         parse_str(file_get_contents("php://input"), $this->put);
-
-        parent::__construct($context);
 
     }
 

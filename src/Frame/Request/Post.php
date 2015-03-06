@@ -13,10 +13,10 @@ class Post extends Foundation implements RequestInterface
     public function __construct(\Frame\Core\Context $context)
     {
 
+        parent::__construct($context);
+
         $this->type = 'Post';
         $this->post = $_POST;
-
-        parent::__construct($context);
 
     }
 

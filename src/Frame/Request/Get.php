@@ -13,10 +13,10 @@ class Get extends Foundation implements RequestInterface
     public function __construct(\Frame\Core\Context $context)
     {
 
+        parent::__construct($context);
+
         $this->type = 'Get';
         $this->get = $_GET;
-
-        parent::__construct($context);
 
     }
 

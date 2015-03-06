@@ -2,34 +2,128 @@
 
 namespace Frame\Response;
 
+use Frame\Core\Context;
+
 class Response extends Foundation implements ResponseInterface
 {
 
     private $responseClass;
 
     /*
-     * Change the response class during runtime
+     * Use our own constructor, do not call the parent constructor so the
+     * view directory is not set initially
      */
-    public function setType($type)
+    public function __construct(Context $context)
     {
 
-        $responseClass = __NAMESPACE__ . '\\' . $type;
-        if (class_exists($responseClass)) {
-            $this->responseClass = new $responseClass;
-        } else {
-            throw new \Exception('Class ' . $responseClass . ' does not exist, cannot be set as response type');
-        }
+        $this->context = $context;
 
     }
 
     /*
-     * Call the defined response class
+     * Set the response class
+     */
+    public function setResponseClass($responseClass)
+    {
+
+        if ($responseClass instanceof ResponseInterface) {
+            $this->responseClass = $responseClass;
+        } else {
+            throw new \Exception('Class ' . get_class($responseClass) . ' does not exist, cannot be set as response type');
+        }
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
+     */
+    public function setView(array $view)
+    {
+
+        if (!$this->responseClass) {
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
+        }
+
+        $this->responseClass->setView($view);
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
+     */
+    public function setViewDir($dir)
+    {
+
+        if (!$this->responseClass) {
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
+        }
+
+        $this->responseClass->setViewDir($dir);
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
+     */
+    public function setViewParams($params)
+    {
+
+        if (!$this->responseClass) {
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
+        }
+
+        $this->responseClass->setViewParams($params);
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
+     */
+    public function setStatusCode($statusCode)
+    {
+
+        if (!$this->responseClass) {
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
+        }
+
+        $this->responseClass->setStatusCode($statusCode);
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
+     */
+    public function setContentType($contentType)
+    {
+
+        if (!$this->responseClass) {
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
+        }
+
+        $this->responseClass->setContentType($contentType);
+
+        return $this; // allow for chaining
+
+    }
+
+    /*
+     * Overridden response class method
      */
     public function render($params = null)
     {
 
         if (!$this->responseClass) {
-            throw new \Exception('No Response type defined. Use Response \$response->setType() to indicate.');
+            throw new \Exception('No Response type defined. Use $response->setResponseClass() to indicate.');
         }
 
         $this->responseClass->render($params);

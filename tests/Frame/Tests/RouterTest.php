@@ -121,6 +121,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testIndexRouteUrlParamsRequestWithSpace()
+    {
+
+        $this->expectOutputString(json_encode(['id' => '123', 'slug' => 'sluggish spaces']));
+
+        $this->router->parseUrl($this->generateUrl('/urlParamsRequest/123/sluggish%20spaces'));
+
+    }
+
     public function testProductsRouteDefault()
     {
 

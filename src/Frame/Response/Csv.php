@@ -13,7 +13,7 @@ class Csv extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
-        $params = ($params ?: $this->viewParams);
+        $params = ($params != null ? $params : $this->viewParams);
 
         if (!is_array($params)) {
             throw new InvalidResponseException('Csv response value must be an array');

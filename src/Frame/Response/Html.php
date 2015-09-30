@@ -10,7 +10,7 @@ class Html extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
-        $params = ($params ?: $this->viewParams);
+        $params = ($params != null ? $params : $this->viewParams);
 
         if (!headers_sent()) {
             http_response_code($this->statusCode);

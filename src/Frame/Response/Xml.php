@@ -13,7 +13,7 @@ class Xml extends Foundation implements ResponseInterface
     public function render($params = null)
     {
 
-        $params = ($params ?: $this->viewParams);
+        $params = ($params != null ? $params : $this->viewParams);
 
         if (!is_array($params)) {
             throw new InvalidResponseException('Xml response value must be an array');

@@ -17,10 +17,10 @@ class Url
                 function($matches) use (&$keys) {
                     $keys[] = $matches[3];
                     if ($matches[1] == '/') {
-                        return '/([A-Za-z0-9_-]+)';
+                        return '/([A-Za-z0-9_%+-]+)';
                     } else
                     if ($matches[1] == '(/') {
-                        return '/?([A-Za-z0-9_-]+)?';
+                        return '/?([A-Za-z0-9_%+-]+)?';
                     }
                 }, $urlTemplate
             )) . '$/i';
@@ -53,9 +53,13 @@ class Url
         $regex = static::templateToRegex($urlTemplate, $keys);
 
         if (preg_match($regex, $requestUri, $matches) !== false) {
-            return array_combine($keys,
+            $values = array_combine($keys,
                 array_pad(array_slice($matches, 1), count($keys), null)
             );
+            foreach($values as $key => $value) {
+                $values[$key] = urldecode($value);
+            }
+            return $values;
         }
 
     }

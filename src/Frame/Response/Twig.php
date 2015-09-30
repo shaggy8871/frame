@@ -84,7 +84,7 @@ class Twig extends Foundation implements ResponseInterface
             'url' => $this->context->getUrl()
         ]);
 
-        $params = ($params ?: $this->viewParams);
+        $params = ($params != null ? $params : $this->viewParams);
 
         if (!headers_sent()) {
             http_response_code($this->statusCode);

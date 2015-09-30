@@ -28,7 +28,7 @@ class Phtml extends Foundation implements ResponseInterface
             throw new ResponseConfigException("Phtml Response class cannot find specified view file " . $viewFile);
         }
 
-        $params = ($params ?: $this->viewParams);
+        $params = ($params != null ? $params : $this->viewParams);
 
         if (!headers_sent()) {
             http_response_code($this->statusCode);

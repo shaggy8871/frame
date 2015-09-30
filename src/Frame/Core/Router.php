@@ -154,18 +154,22 @@ class Router
         }
 
         // Attempt 4: check for a controller with routeDefault method
-        $path = $pathComponents;
-        $lookupName = array_shift($path);
-        $method = self::ROUTE_DEFAULT;
-        $controller = $this->findController($lookupName);
-        if ($controller) {
-            $methodFound = $this->findMethod($controller, $method);
-            if ($methodFound) {
-                return $methodFound;
+        if (count($pathComponents) == 1) {
+            $path = $pathComponents;
+            $lookupName = array_shift($path);
+            $method = self::ROUTE_DEFAULT;
+            $controller = $this->findController($lookupName);
+            if ($controller) {
+                $methodFound = $this->findMethod($controller, $method);
+                if ($methodFound) {
+                    return $methodFound;
+                }
             }
         }
 
         // Attempt 5: look for a method in the Index controller
+        $path = $pathComponents;
+        $lookupName = array_shift($path);
         $method = ($lookupName ? 'route' . $lookupName : self::ROUTE_DEFAULT);
         $controller = $this->findController('Index');
         if ($controller) {

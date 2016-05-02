@@ -17,10 +17,10 @@ class Url
                 function($matches) use (&$keys) {
                     $keys[] = $matches[3];
                     if ($matches[1] == '/') {
-                        return '/([A-Za-z0-9_%+-]+)';
+                        return '/([A-Za-z0-9_%+.-]+)';
                     } else
                     if ($matches[1] == '(/') {
-                        return '/?([A-Za-z0-9_%+-]+)?';
+                        return '/?([A-Za-z0-9_%+.-]+)?';
                     }
                 }, $urlTemplate
             )) . '$/i';

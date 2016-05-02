@@ -130,6 +130,15 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testIndexRouteUrlParamsRequestWithPeriod()
+    {
+
+        $this->expectOutputString(json_encode(['id' => '123', 'slug' => '192.168.76.1']));
+
+        $this->router->parseUrl($this->generateUrl('/urlParamsRequest/123/192.168.76.1'));
+
+    }
+
     public function testProductsRouteDefault()
     {
 

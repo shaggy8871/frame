@@ -13,7 +13,7 @@ class Url
     {
 
         return '/^' . str_replace('/', '\/',
-            preg_replace_callback('/([\/\(]*)(\()?:([a-z]+)([\)]*)?/',
+            preg_replace_callback('/([\/\(]*)(\()?:([a-z0-9]+)([\)]*)?/',
                 function($matches) use (&$keys) {
                     $keys[] = $matches[3];
                     if ($matches[1] == '/') {
@@ -34,7 +34,7 @@ class Url
     {
 
         return
-            preg_replace_callback('/([\/\(]*)(\()?:([a-z]+)([\)]*)?/',
+            preg_replace_callback('/([\/\(]*)(\()?:([a-z0-9]+)([\)]*)?/',
                 function($matches) use ($params) {
                     if (($matches[1] == '/') || ($matches[1] == '(/')) {
                         return (isset($params[$matches[3]]) ? '/' . $params[$matches[3]] : '');

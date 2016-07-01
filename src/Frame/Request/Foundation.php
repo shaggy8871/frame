@@ -91,4 +91,21 @@ abstract class Foundation
 
     }
 
+    /*
+    * Returns true if the property is set
+    */
+    public function __isset($property)
+    {
+
+        if (!property_exists($this, $property)) {
+            throw new UnknownPropertyException($property, __CLASS__);
+        }
+
+        $reflect = new \ReflectionProperty($this, $property);
+        if ((!$reflect->isPrivate()) && ($this->property)) {
+            return true;
+        }
+
+    }
+
 }

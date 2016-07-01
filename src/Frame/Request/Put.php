@@ -21,6 +21,16 @@ class Put extends Foundation implements RequestInterface
     }
 
     /*
+     * Optional method to set the input manually
+     */
+    public function setProps(array $properties)
+    {
+
+        $this->put = $properties;
+        
+    }
+
+    /*
      * Return all properties as an array
      */
     public function toArray()
@@ -37,6 +47,16 @@ class Put extends Foundation implements RequestInterface
     {
 
         return (isset($this->put[$property]) ? $this->put[$property] : null);
+
+    }
+
+    /*
+     * Magic isset method maps requests to the protected $put property
+     */
+    public function __isset($property)
+    {
+
+        return isset($this->put[$property]);
 
     }
 

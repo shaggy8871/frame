@@ -40,4 +40,14 @@ class Post extends Foundation implements RequestInterface
 
     }
 
+    /*
+     * Magic isset method maps requests to the protected $post property
+     */
+    public function __isset($property)
+    {
+
+        return isset($this->post[$property]);
+
+    }
+
 }

@@ -21,26 +21,9 @@ class RouteParams extends Foundation implements RequestInterface
 
         $this->type = 'RouteParams';
 
-        // Default approach to route param parsing
-        $this->routeParams = explode('/', $context->getUrl()->requestUri);
-
-    }
-
-    /*
-     * Allow the request object to be created using the @canonical DocBlock comment
-     */
-    public static function createFromRequest(Request $request)
-    {
-
-        $self = new static($request->context);
-
-        if (isset($request->context->getCaller()->annotations['canonical'])) {
-            $self->setRouteParams(Url::extract($request->context->getCaller()->annotations['canonical'], $request->context->getUrl()->requestUri));
-        } else {
-            throw new Exception\MissingDocBlockException('RouteParams Request class requires @canonical DocBlock on calling method.');
+        if (isset($context->getCaller()->annotations['canonical'])) {
+            $this->routeParams = Url::extract($context->getCaller()->annotations['canonical'], $context->getUrl()->requestUri);
         }
-
-        return $self;
 
     }
 
@@ -71,6 +54,16 @@ class RouteParams extends Foundation implements RequestInterface
     {
 
         return (isset($this->routeParams[$property]) ? $this->routeParams[$property] : null);
+
+    }
+
+    /*
+     * Magic isset method maps requests to the protected $routeParams property
+     */
+    public function __isset($property)
+    {
+
+        return isset($this->routeParams[$property]);
 
     }
 

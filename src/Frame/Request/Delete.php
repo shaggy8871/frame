@@ -21,6 +21,16 @@ class Delete extends Foundation implements RequestInterface
     }
 
     /*
+     * Optional method to set the input manually
+     */
+    public function setProps(array $properties)
+    {
+
+        $this->delete = $properties;
+        
+    }
+
+    /*
      * Return all properties as an array
      */
     public function toArray()
@@ -37,6 +47,16 @@ class Delete extends Foundation implements RequestInterface
     {
 
         return (isset($this->delete[$property]) ? $this->delete[$property] : null);
+
+    }
+
+    /*
+     * Magic isset method maps requests to the protected $delete property
+     */
+    public function __isset($property)
+    {
+
+        return isset($this->delete[$property]);
 
     }
 

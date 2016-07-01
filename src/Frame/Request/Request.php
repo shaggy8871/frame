@@ -81,7 +81,7 @@ class Request extends Foundation implements RequestInterface
     {
 
         if (!$this->routeParams) {
-            $this->routeParams = RouteParams::createFromRequest($this);
+            $this->routeParams = new RouteParams($this->context);
         }
 
         return $this->routeParams;

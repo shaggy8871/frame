@@ -17,13 +17,9 @@ class Args extends Foundation implements RequestInterface
     public function __construct(\Frame\Core\Context $context)
     {
 
-        foreach ($GLOBALS['argv'] as $key => $value) {
-            if ($key) {
-                $this->args['arg' . $key] = $value;
-            }
-        }
+        parent::__construct($context);
 
-        parent::_construct($context);
+        $this->args = $GLOBALS['argv'];
 
     }
 
@@ -44,6 +40,16 @@ class Args extends Foundation implements RequestInterface
     {
 
         return (isset($this->args[$property]) ? $this->args[$property] : null);
+
+    }
+
+    /*
+     * Magic isset method maps requests to the protected $args property
+     */
+    public function __isset($property)
+    {
+
+        return isset($this->args[$property]);
 
     }
 

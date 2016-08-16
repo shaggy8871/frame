@@ -23,7 +23,7 @@ class Csv extends Foundation implements ResponseInterface
             http_response_code($this->statusCode);
             header('Content-Type: ' . $this->contentType);
             if ($this->downloadFilename != null) {
-                header('Content-Disposition: attachment; filename="' . $this->filename . '"');
+                header('Content-Disposition: attachment; filename="' . $this->downloadFilename . '"');
                 header('Content-Transfer-Encoding: binary');
             }
         }

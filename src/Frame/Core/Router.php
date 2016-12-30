@@ -275,6 +275,8 @@ class Router
     private function invokeCallable($reflection, $class = null)
     {
 
+        $this->beforeCall($reflection, $class);
+
         // Get an array of ReflectionParameter objects
         $params = $reflection->getParameters();
         // Injection array
@@ -332,6 +334,8 @@ class Router
             $response = $reflection->invokeArgs($inject);
         }
 
+        $this->afterCall($response);
+
         if (($response !== false) && ($response !== null)) {
             // If object is a Response class, simply call the render method (assume it knows what to do)
             // Otherwise call the render method on the defined/default response class
@@ -355,6 +359,117 @@ class Router
             }
         }
 
+    }
+
+    /**
+     * Allows a @before annotation to determine a different route
+     */
+    private function beforeCall(&$reflection, &$class)
+    {
+
+        if (!isset($this->caller->annotations['before'])) {
+            return; // proceed
+        }
+
+        $route = $this->caller->annotations['before'];
+        $projectControllers = $this->project->ns . '\\Controllers\\';
+        $beforeClass = null;
+        $beforeReflection = null;
+
+        // If we get a string back in format $controller::$method, look for the method
+        // If the return class method starts with "\" char, look outside the project controller tree
+        if ((is_string($route)) && (strpos($route, '::') !== false)) {
+            list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
+            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                $beforeClass = new $controller($this->project);
+                $beforeReflection = new \ReflectionMethod($beforeClass, $method);
+            }
+        } else
+        // If we get a method name back, look in the same class
+        if ((is_string($route)) && (method_exists($class, $route))) {
+            $beforeClass = $class;
+            $beforeReflection = new \ReflectionMethod($class, $route);
+        } else
+        // Otherwise if it's callable, it must be a function
+        if (is_callable($route)) {
+            $beforeClass = $class;
+            $beforeReflection = new \ReflectionFunction($route);
+        }
+
+        if (!($beforeReflection instanceof \ReflectionFunctionAbstract)) {
+            return; // ignore; @todo: log reason
+        }
+
+        // Get an array of ReflectionParameter objects
+        $params = $beforeReflection->getParameters();
+        // Injection array
+        $inject = [];
+        // Loop through parameters to determine their class types
+        foreach($params as $param) {
+            try {
+                $paramClass = $param->getClass();
+            } catch (\Exception $e) {
+                // Rethrow the error with further information
+                throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
+            }
+            // If it's not a class, inject a null value
+            if (!($paramClass instanceof \ReflectionClass)) {
+                $inject[] = null;
+                continue;
+            }
+            // Special case for a Url and Project type hints, send in the one we already have
+            if ($paramClass->name == 'Frame\\Core\\Url') {
+                $inject[] = $this->url;
+            } else
+            if ($paramClass->name == 'Frame\\Core\\Project') {
+                $inject[] = $this->project;
+            } else
+            if ($paramClass->name == 'Frame\\Core\\Context') {
+                $inject[] = new Context($this->project, $this->url, $this->caller);
+            } else {
+                $inject[] = null;
+            }
+        }
+
+        // Send the injected parameters into the identified method
+        if ($beforeReflection instanceof \ReflectionMethod) {
+            $response = $beforeReflection->invokeArgs($beforeClass, $inject);
+        } else {
+            $response = $beforeReflection->invokeArgs($inject);
+        }
+
+        // If we get a string back in format $controller::$method, look for the method
+        // If the return class method starts with "\" char, look outside the project controller tree
+        if ((is_string($response)) && (strpos($response, '::') !== false)) {
+            list($controller, $method) = explode('::', ($response[0] != '\\' ? $projectControllers : '') . $response);
+            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                // Override parameters:
+                $class = new $controller($this->project);
+                $reflection = new \ReflectionMethod($class, $method);
+            }
+        } else
+        // If we get a method name back, look in the same class
+        if ((is_string($response)) && (method_exists($class, $response))) {
+            $reflection = new \ReflectionMethod($class, $response);
+        } else
+        // Otherwise, if we get a closure back, call it
+        if (is_callable($response)) {
+            if ((is_array($response)) && (count($response) == 2)) {
+                // Override parameters:
+                $class = new $response[0];
+                $reflection = new \ReflectionMethod($response[0], $response[1]);
+            } else {
+                $reflection = new \ReflectionFunction($response);
+            }
+        }
+
+    }
+
+    /*
+     * @todo
+     */
+    private function afterCall(&$response)
+    {
     }
 
     /*

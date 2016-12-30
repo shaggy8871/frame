@@ -318,6 +318,33 @@ class RouterTest extends \PHPUnit_Framework_TestCase
 
     }
 
+    public function testAuthAllowed()
+    {
+
+        $this->expectOutputString('routeAuthOkay');
+
+        $this->router->parseUrl($this->generateUrl('/auth/allowed'));
+
+    }
+
+    public function testAuthNotAllowed()
+    {
+
+        $this->expectOutputString('routeNotAuthorized');
+
+        $this->router->parseUrl($this->generateUrl('/auth/notallowed'));
+
+    }
+
+    public function testAuthNotAllowedOutside()
+    {
+
+        $this->expectOutputString('routeIndexNotAuthorized');
+
+        $this->router->parseUrl($this->generateUrl('/auth/notallowedoutside'));
+
+    }
+
     public static function setUpBeforeClass()
     {
 

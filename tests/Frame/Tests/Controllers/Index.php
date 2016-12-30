@@ -224,4 +224,11 @@ class Index extends Controller
 
     }
 
+    public function routeNotAuthorized()
+    {
+
+        echo 'routeIndexNotAuthorized';
+
+    }
+
 }

@@ -39,4 +39,31 @@ class Caller
 
     }
 
+    /*
+     * Activate getProperty() style method calls
+     */
+    public function __call($name, $args)
+    {
+
+        if (substr($name, 0, 3) == 'get') {
+            $property = lcfirst(substr($name, 3));
+            if (property_exists($this, $property)) {
+                return $this->$property;
+            } else {
+                throw new Exception\UnknownPropertyException($property, __CLASS__);
+            }
+        }
+
+    }
+
+    /*
+     * Returns true if the property exists
+     */
+    public function __isset($property)
+    {
+
+        return property_exists($this, $property);
+
+    }
+
 }

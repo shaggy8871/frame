@@ -137,7 +137,7 @@ abstract class Foundation
         }
 
         if (isset($_SESSION['FRAME.flash'])) {
-            $flash = json_decode($_SESSION['FRAME.flash']);
+            $flash = json_decode($_SESSION['FRAME.flash'], true);
         } else {
             $flash = [];
         }

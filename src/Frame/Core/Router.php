@@ -286,7 +286,14 @@ class Router
         // Loop through parameters to determine their class types
         foreach($params as $param) {
             try {
-                $paramClass = $param->getClass();
+                // Use of getClass() is deprecated in PHP 8
+                // So we would have to use getType()->getName()
+                // and instantiate the reflection class
+                if (version_compare(PHP_VERSION, '8.0.0') >= 0) {
+                    $paramClass = new \ReflectionClass($param->getType()->getName());
+                } else {
+                    $paramClass = $param->getClass();
+                }
             } catch (\Exception $e) {
                 // Rethrow the error with further information
                 throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
@@ -407,7 +414,14 @@ class Router
         // Loop through parameters to determine their class types
         foreach($params as $param) {
             try {
-                $paramClass = $param->getClass();
+                // Use of getClass() is deprecated in PHP 8
+                // So we would have to use getType()->getName()
+                // and instantiate the reflection class
+                if (version_compare(PHP_VERSION, '8.0.0') >= 0) {
+                    $paramClass = new \ReflectionClass($param->getType()->getName());
+                } else {
+                    $paramClass = $param->getClass();
+                }
             } catch (\Exception $e) {
                 // Rethrow the error with further information
                 throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
@@ -478,7 +492,7 @@ class Router
     private function isRequestClass($class, $autoload = true)
     {
 
-        return in_array('Frame\\Request\\RequestInterface', class_implements($class, $autoload));
+        return in_array('Frame\\Request\\RequestInterface', (array) class_implements($class, $autoload));
 
     }
 

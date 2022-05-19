@@ -57,7 +57,7 @@ class Url
                 array_pad(array_slice($matches, 1), count($keys), null)
             );
             foreach($values as $key => $value) {
-                $values[$key] = urldecode($value);
+                $values[$key] = urldecode((string) $value);
             }
             return $values;
         }

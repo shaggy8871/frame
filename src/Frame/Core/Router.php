@@ -81,7 +81,7 @@ class Router
             // If the return class method starts with "\" char, look outside the project controller tree
             if ((is_string($route)) && (strpos($route, '::') !== false)) {
                 list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
-                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                if ((class_exists((string) $controller)) && (is_callable($controller . '::' . $method, true))) {
                     return $this->invokeClassMethod(new $controller($this->project), $method);
                 }
             }
@@ -104,7 +104,7 @@ class Router
         $path = $pathComponents;
         $method = self::ROUTE_RESOLVER;
         $controller = $projectControllers . (empty($path) ? 'Index' : $path[0]);
-        $controllerClass = (class_exists($controller) ? new $controller($this->project) : null);
+        $controllerClass = (class_exists((string) $controller) ? new $controller($this->project) : null);
         if (($controllerClass) && (method_exists($controllerClass, $method))) {
 
             // Call routeResolver in the controller class
@@ -114,7 +114,7 @@ class Router
             // If the return class method starts with "\" char, look outside the project controller tree
             if ((is_string($route)) && (strpos($route, '::') !== false)) {
                 list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
-                if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+                if ((class_exists((string) $controller)) && (is_callable($controller . '::' . $method, true))) {
                     return $this->invokeClassMethod(new $controller($this->project), $method);
                 }
             }
@@ -202,7 +202,7 @@ class Router
         $path = $pathComponents;
         $method = self::ROUTE_NOTFOUND;
         $controller = $this->findController((empty($path) ? 'Index' : $path[0]));
-        if ((class_exists($controller)) && (is_callable($controller . '::' . $method))) {
+        if ((class_exists((string) $controller)) && (is_callable($controller . '::' . $method))) {
             return (new $controller($this->project))->$method($this->url, $this->project);
         }
 
@@ -286,7 +286,14 @@ class Router
         // Loop through parameters to determine their class types
         foreach($params as $param) {
             try {
-                $paramClass = $param->getClass();
+                // Use of getClass() is deprecated in PHP 8
+                // So we would have to use getType()->getName()
+                // and instantiate the reflection class
+                if (version_compare(PHP_VERSION, '8.0.0') >= 0) {
+                    $paramClass = new \ReflectionClass($param->getType()->getName());
+                } else {
+                    $paramClass = $param->getClass();
+                }
             } catch (\Exception $e) {
                 // Rethrow the error with further information
                 throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
@@ -380,7 +387,7 @@ class Router
         // If the return class method starts with "\" char, look outside the project controller tree
         if ((is_string($route)) && (strpos($route, '::') !== false)) {
             list($controller, $method) = explode('::', ($route[0] != '\\' ? $projectControllers : '') . $route);
-            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+            if ((class_exists((string) $controller)) && (is_callable($controller . '::' . $method, true))) {
                 $beforeClass = new $controller($this->project);
                 $beforeReflection = new \ReflectionMethod($beforeClass, $method);
             }
@@ -407,7 +414,14 @@ class Router
         // Loop through parameters to determine their class types
         foreach($params as $param) {
             try {
-                $paramClass = $param->getClass();
+                // Use of getClass() is deprecated in PHP 8
+                // So we would have to use getType()->getName()
+                // and instantiate the reflection class
+                if (version_compare(PHP_VERSION, '8.0.0') >= 0) {
+                    $paramClass = new \ReflectionClass($param->getType()->getName());
+                } else {
+                    $paramClass = $param->getClass();
+                }
             } catch (\Exception $e) {
                 // Rethrow the error with further information
                 throw new ClassNotFoundException($param->getName(), ($this->caller->controller ? get_class($this->caller->controller) : null), $this->caller->method);
@@ -442,7 +456,7 @@ class Router
         // If the return class method starts with "\" char, look outside the project controller tree
         if ((is_string($response)) && (strpos($response, '::') !== false)) {
             list($controller, $method) = explode('::', ($response[0] != '\\' ? $projectControllers : '') . $response);
-            if ((class_exists($controller)) && (is_callable($controller . '::' . $method, true))) {
+            if ((class_exists((string) $controller)) && (is_callable($controller . '::' . $method, true))) {
                 // Override parameters:
                 $class = new $controller($this->project);
                 $reflection = new \ReflectionMethod($class, $method);
@@ -478,7 +492,7 @@ class Router
     private function isRequestClass($class, $autoload = true)
     {
 
-        return in_array('Frame\\Request\\RequestInterface', class_implements($class, $autoload));
+        return in_array('Frame\\Request\\RequestInterface', (array) class_implements($class, $autoload));
 
     }
 
@@ -657,7 +671,7 @@ class Router
     private function createAlias($from, $to)
     {
 
-        if ((class_exists($from)) && (!class_exists($to))) {
+        if ((class_exists((string) $from)) && (!class_exists((string) $to))) {
             class_alias($from, $to);
         }
 
